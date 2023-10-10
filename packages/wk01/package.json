@@ -1,0 +1,20 @@
+{
+  "name": "wk01",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/main.js",
+  "types": "./dist/main.d.ts",
+  "scripts": {
+    "build": "tsc --project ./tsconfig.json",
+    "clean": "rm -rf dist",
+    "start": "ts-node src/main.ts"
+  },
+  "devDependencies": {
+    "@tsconfig/node18": "^18.2.2",
+    "@types/node": "^20.8.4",
+    "ts-node": "^10.9.1",
+    "tslib": "^2.6.2",
+    "typescript": "^5.0.2"
+  }
+}
