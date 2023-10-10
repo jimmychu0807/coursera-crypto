@@ -9,6 +9,8 @@
   "scripts": {
     "fmt": "prettier --write .",
     "lint": "eslint .",
+    "clean": "pnpm --filter \"*\" clean",
+    "build": "pnpm --filter \"*\" build",
     "wk01": "pnpm --filter wk01",
     "prepare": "husky install",
     "test": "echo \"Error: no test specified\" && exit 1"
