@@ -1,0 +1,18 @@
+{
+  "name": "wk01",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/common.js",
+  "types": "./dist/main.d.ts",
+  "scripts": {
+    "start": "ts-node-esm src/main.ts",
+    "build": ""
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.4",
+    "ts-node": "^10.9.1",
+    "tslib": "^2.6.2",
+    "typescript": "^5.0.2"
+  }
+}
