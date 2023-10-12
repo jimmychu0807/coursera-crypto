@@ -1,7 +1,4 @@
-interface IBitXOROptions {
-  equalizeLen: "trim" | "expand";
-  direction: "toLeft" | "toRight";
-}
+import { hexStrToU8a } from "./utils.js";
 
 const ciphertexts = [
   "315c4eeaa8b5f8aaf9174145bf43e1784b8fa00dc71d885a804e5ee9fa40b16349c146fb778cdf2d3aff021dfff5b403b510d0d0455468aeb98622b137dae857553ccd8883a7bc37520e06e515d22c954eba5025b8cc57ee59418ce7dc6bc41556bdb36bbca3e8774301fbcaa3b83b220809560987815f65286764703de0f3d524400a19b159610b11ef3e",
@@ -19,55 +16,12 @@ const ciphertexts = [
 const toDecrypt =
   "32510ba9babebbbefd001547a810e67149caee11d945cd7fc81a05e9f85aac650e9052ba6a8cd8257bf14d13e6f0a803b54fde9e77472dbff89d71b57bddef121336cb85ccb8f3315f4b52e301d16e9f52f904";
 
-const utils = {
-  hexStrToU8a: (hexString: string): Uint8Array => {
-    return Uint8Array.from(Buffer.from(hexString, "hex"));
-  },
-
-  u8aToHexStr: (hex: Uint8Array): string => {
-    return Buffer.from(hex).toString("hex");
-  },
-
-  bitXOR: (
-    input1: Uint8Array,
-    input2: Uint8Array,
-    opts: IBitXOROptions,
-  ): Uint8Array => {
-    let [ei1, ei2] =
-      input1.length >= input2.length ? [input1, input2] : [input2, input1];
-
-    // Equalize the length of the two input based on opts setting
-    if (ei1.length !== ei2.length) {
-      // ei1 is always the one with longer length among the two
-      if (opts.equalizeLen === "trim") {
-        ei1 =
-          opts.direction === "toLeft"
-            ? ei1.slice(ei1.length - ei2.length)
-            : ei1.slice(0, ei2.length);
-      } else {
-        // opts.equalizeLen === 'expand'
-        const newi2 = new Uint8Array(ei1.length);
-        opts.direction === "toLeft"
-          ? newi2.set(ei2, ei1.length - ei2.length)
-          : newi2.set(ei2, 0);
-        ei2 = newi2;
-      }
-    }
-
-    const result = new Uint8Array(ei1.length);
-    for (let idx = 0; idx < result.length; idx++) {
-      result[idx] = ei1[idx] ^ ei2[idx];
-    }
-    return result;
-  },
-};
-
 function main() {
   toDecrypt;
 
   const [ciphertext1, ciphertext2] = ciphertexts;
-  const u8a1 = utils.hexStrToU8a(ciphertext1);
-  const u8a2 = utils.hexStrToU8a(ciphertext2);
+  const u8a1 = hexStrToU8a(ciphertext1);
+  const u8a2 = hexStrToU8a(ciphertext2);
 
   console.log(`u8a1: ${u8a1}`);
   console.log(`u8a2: ${u8a2}`);
