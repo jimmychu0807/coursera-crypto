@@ -1,4 +1,8 @@
-import { hexStrToU8a } from "./utils.js";
+import * as fs from "node:fs/promises";
+
+import { hexStrToU8a, bitXOR, u8aToHexStr, u8aToUTF8 } from "./utils.js";
+
+const FILE_NAME = "dump.txt";
 
 const ciphertexts = [
   "315c4eeaa8b5f8aaf9174145bf43e1784b8fa00dc71d885a804e5ee9fa40b16349c146fb778cdf2d3aff021dfff5b403b510d0d0455468aeb98622b137dae857553ccd8883a7bc37520e06e515d22c954eba5025b8cc57ee59418ce7dc6bc41556bdb36bbca3e8774301fbcaa3b83b220809560987815f65286764703de0f3d524400a19b159610b11ef3e",
@@ -16,15 +20,40 @@ const ciphertexts = [
 const toDecrypt =
   "32510ba9babebbbefd001547a810e67149caee11d945cd7fc81a05e9f85aac650e9052ba6a8cd8257bf14d13e6f0a803b54fde9e77472dbff89d71b57bddef121336cb85ccb8f3315f4b52e301d16e9f52f904";
 
-function main() {
-  toDecrypt;
+async function dumpToFile(crossXOR: Uint8Array[][]) {
+  let outContent = "";
 
-  const [ciphertext1, ciphertext2] = ciphertexts;
-  const u8a1 = hexStrToU8a(ciphertext1);
-  const u8a2 = hexStrToU8a(ciphertext2);
+  for (let i = 0; i < crossXOR.length; i++) {
+    for (let j = 0; j < crossXOR[i].length; j++) {
+      if (!crossXOR[i][j]) continue;
 
-  console.log(`u8a1: ${u8a1}`);
-  console.log(`u8a2: ${u8a2}`);
+      outContent += `m${i} XOR m${j}\n`;
+      outContent += `hexStr: ${u8aToHexStr(crossXOR[i][j], " ")}\n`;
+      outContent += `utf8:   ${u8aToUTF8(crossXOR[i][j], "  ")}\n\n`;
+    }
+  }
+
+  await fs.writeFile(FILE_NAME, outContent, { encoding: "utf8" });
 }
 
-main();
+async function main() {
+  toDecrypt;
+
+  const crossXOR: Uint8Array[][] = [];
+
+  for (let i = 0; i < ciphertexts.length; i++) {
+    for (let j = i + 1; j < ciphertexts.length; j++) {
+      const u8ai = hexStrToU8a(ciphertexts[i]);
+      const u8aj = hexStrToU8a(ciphertexts[j]);
+
+      // A new row
+      crossXOR[i] === undefined && (crossXOR[i] = []);
+
+      crossXOR[i][j] = bitXOR(u8ai, u8aj);
+    }
+  }
+
+  await dumpToFile(crossXOR);
+}
+
+await main();

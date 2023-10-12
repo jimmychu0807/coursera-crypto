@@ -60,5 +60,5 @@ function bitXOR(
   return result;
 }
 
-export { hexStrToU8a, u8aToHexStr, bitXOR, u8aToUTF8 };
+export { bitXOR, hexStrToU8a, u8aToHexStr, u8aToUTF8 };
 export type { IBitXOROptions };
