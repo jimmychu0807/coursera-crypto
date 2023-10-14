@@ -1,8 +1,5 @@
-import * as fs from "node:fs/promises";
-
 import { hexStrToU8a, bitXOR, u8aToHexStr, u8aToUTF8, intArrToU8a } from "./utils.js";
 
-const FILE_NAME = "dump.txt";
 const UNKNOWN_CHAR = "░";
 const SPACE_CHAR = " ";
 const SPACE_CODEPOINT = 32;
@@ -27,26 +24,32 @@ const ciphertexts = [
 
 //ref: ASCII table: https://www.asciitable.com/
 
-async function dumpToFile(crossXOR: Uint8Array[][]) {
+function dumpCrossXOR(crossXOR: Uint8Array[][]): string {
   let outContent = "";
-
   for (let i = 0; i < crossXOR.length; i++) {
     for (let j = 0; j < crossXOR[i].length; j++) {
       if (!crossXOR[i][j]) continue;
 
       outContent += `m${i} XOR m${j}\n`;
-      outContent += `hexStr: ${u8aToHexStr(crossXOR[i][j], " ")}\n`;
-      outContent += `utf8:   ${u8aToUTF8(crossXOR[i][j], "  ")}\n\n`;
+      outContent += `hexStr: ${u8aToHexStr(crossXOR[i][j])}\n`;
+      outContent += `utf8:   ${u8aToUTF8(crossXOR[i][j], " ")}\n\n`;
     }
   }
+  return outContent;
+}
 
-  await fs.writeFile(FILE_NAME, outContent, { encoding: "utf8" });
+function dumpMsgsAndKey(guessedMsgs: string[][], guessedKey: Uint8Array): string {
+  const gms = guessedMsgs.map((oneMsg, idx) => `msg ${idx}: ${oneMsg.join("")}`).join("\n");
+  const gk = u8aToHexStr(guessedKey);
+
+  return `guessedMsgs:\n${gms}\nguessedKeys:\n${gk}\n`;
 }
 
 // -- Main Function -- //
 
 async function main() {
   const cipherU8a = ciphertexts.map((c) => hexStrToU8a(c));
+  const maxTextLen: number = ciphertexts.reduce((memo, c) => Math.max(memo, c.length), 0);
 
   const crossXOR: Uint8Array[][] = [];
   for (let i = 0; i < cipherU8a.length; i++) {
@@ -59,9 +62,9 @@ async function main() {
     }
   }
 
-  await dumpToFile(crossXOR);
+  console.log("--- dumpCrossXOR ---\n", dumpCrossXOR(crossXOR));
 
-  const guessedKey = new Uint8Array();
+  const guessedKey = new Uint8Array(maxTextLen);
   const guessedMsgs: string[][] = new Array(ciphertexts.length);
 
   for (let i = 0; i < crossXOR.length; i++) {
@@ -110,8 +113,14 @@ async function main() {
         intArrToU8a([cipherU8a[i].at(strOffset) as number]),
         intArrToU8a([SPACE_CODEPOINT]),
       );
+
+      console.log(
+        `Set keypos ${strOffset} from val: ${guessedKey.at(strOffset)} to ${keyBytes.at(0)}`,
+      );
       guessedKey.set(keyBytes, strOffset);
     } // end of the while(inbound) { /* ... */ } loop
+
+    console.log(`--- dumpMsgsAndKey ${i} ---\n`, dumpMsgsAndKey(guessedMsgs, guessedKey));
   }
 }
 
