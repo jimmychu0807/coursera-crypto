@@ -1,6 +1,8 @@
 {
   "extends": "@tsconfig/node18/tsconfig.json",
   "compilerOptions": {
+    "module": "nodenext",
+
     /* Bundler mode */
     "resolveJsonModule": true,
     "isolatedModules": true,
