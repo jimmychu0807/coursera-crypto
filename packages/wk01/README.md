@@ -12,7 +12,13 @@ notes:
 - review the code is good
 - need to count back for those j > i
 
+Todo:
+
+- you need test cases
+- add debug flag to disable the log msg
+
 further learning:
 
-- jsdoc (https://jsdoc.app/about-getting-started.html)
-- tsdoc (https://tsdoc.org/)
+- learn documenting your code
+  - jsdoc (https://jsdoc.app/about-getting-started.html)
+  - tsdoc (https://tsdoc.org/)

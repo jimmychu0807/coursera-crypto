@@ -1,9 +1,9 @@
-import { hexStrToU8a, bitXOR, u8aToHexStr, u8aToUTF8, intArrToU8a } from "./utils.js";
+import { hexStrToU8a, bitXOR, u8aToHexStr, u8aToUtf8, hexStrToUtf8 } from "./utils.js";
 
 const UNKNOWN_CHAR = "░";
 const SPACE_CHAR = " ";
 const SPACE_CODEPOINT = 32;
-const ALPHABET_CNT_THRESHOLD = 8;
+const ALPHABET_CNT_THRESHOLD_PC = 0.8;
 
 const ciphertexts = [
   "315c4eeaa8b5f8aaf9174145bf43e1784b8fa00dc71d885a804e5ee9fa40b16349c146fb778cdf2d3aff021dfff5b403b510d0d0455468aeb98622b137dae857553ccd8883a7bc37520e06e515d22c954eba5025b8cc57ee59418ce7dc6bc41556bdb36bbca3e8774301fbcaa3b83b220809560987815f65286764703de0f3d524400a19b159610b11ef3e",
@@ -19,10 +19,26 @@ const ciphertexts = [
   "32510ba9babebbbefd001547a810e67149caee11d945cd7fc81a05e9f85aac650e9052ba6a8cd8257bf14d13e6f0a803b54fde9e77472dbff89d71b57bddef121336cb85ccb8f3315f4b52e301d16e9f52f904",
 ];
 
+// const ciphertexts = [
+//   "315c4eeaa8b5f8aaf917",
+//   "234c02ecbbfbafa3ed18",
+//   "32510ba9a7b2bba9b800",
+//   "32510ba9aab2a8a4fd06",
+// ];
+
 // const toDecrypt =
 //   "32510ba9babebbbefd001547a810e67149caee11d945cd7fc81a05e9f85aac650e9052ba6a8cd8257bf14d13e6f0a803b54fde9e77472dbff89d71b57bddef121336cb85ccb8f3315f4b52e301d16e9f52f904";
 
 //ref: ASCII table: https://www.asciitable.com/
+
+function dumpInputCiphers(ciphertexts: string[]): string {
+  return ciphertexts
+    .map((oneCipher, idx) => {
+      const prefix = `msg ${idx}: `;
+      return `${prefix}${oneCipher}\n${" ".repeat(prefix.length)}${hexStrToUtf8(oneCipher, " ")}`;
+    })
+    .join("\n\n");
+}
 
 function dumpCrossXOR(crossXOR: Uint8Array[][]): string {
   let outContent = "";
@@ -32,29 +48,57 @@ function dumpCrossXOR(crossXOR: Uint8Array[][]): string {
 
       outContent += `m${i} XOR m${j}\n`;
       outContent += `hexStr: ${u8aToHexStr(crossXOR[i][j])}\n`;
-      outContent += `utf8:   ${u8aToUTF8(crossXOR[i][j], " ")}\n\n`;
+      outContent += `utf8:   ${u8aToUtf8(crossXOR[i][j], " ")}\n\n`;
     }
   }
-  return outContent;
+  // remove the last two line break char
+  return outContent.length >= 2 ? outContent.slice(0, -2) : outContent;
 }
 
-function dumpMsgsAndKey(guessedMsgs: string[][], guessedKey: Uint8Array): string {
-  const gms = guessedMsgs.map((oneMsg, idx) => `msg ${idx}: ${oneMsg.join("")}`).join("\n");
+function dumpMsgsAndKey(guessedMsgs: string[], guessedKey: Uint8Array): string {
+  const gms = guessedMsgs.map((msg, idx) => `msg ${idx}: ${msg}`).join("\n");
   const gk = u8aToHexStr(guessedKey);
-
   return `guessedMsgs:\n${gms}\nguessedKeys:\n${gk}\n`;
+}
+
+function visibleAlphabetCnt(arr: Uint8Array[], pos: number): number {
+  const codePts: number[] = arr.map((el) => el.at(pos) || 0);
+  return codePts.reduce((memo, p) => (p >= 32 && p <= 126 ? memo + 1 : memo), 0);
+}
+
+function selectSurface(crossXOR: Uint8Array[][], idx: number): Uint8Array[] {
+  const res = [];
+  for (let i = 0; i < crossXOR.length; i++) {
+    if (i === idx) continue;
+    res.push(i > idx ? crossXOR[idx][i] : crossXOR[i][idx]);
+  }
+
+  console.log(`surface for idx: ${idx}`, res);
+
+  return res;
+}
+
+function replaceChar(inputStr: string, replaceAt: number, replacement: string): string {
+  return inputStr.slice(0, replaceAt) + replacement + inputStr.slice(replaceAt + 1);
 }
 
 // -- Main Function -- //
 
 async function main() {
   const cipherU8a = ciphertexts.map((c) => hexStrToU8a(c));
+  const threshold = Math.floor(ciphertexts.length * ALPHABET_CNT_THRESHOLD_PC);
   const maxTextLen: number = ciphertexts.reduce((memo, c) => Math.max(memo, c.length), 0);
 
-  const crossXOR: Uint8Array[][] = [];
+  console.log(
+    `# of ciphertexts: ${ciphertexts.length}. Threshold: ${threshold}\n MaxTextLen: ${maxTextLen}\n`,
+  );
+  console.log(`-- dump input cipher --\n${dumpInputCiphers(ciphertexts)}\n`);
+
+  const crossXOR: Uint8Array[][] = new Array(cipherU8a.length);
   for (let i = 0; i < cipherU8a.length; i++) {
+    crossXOR[i] = crossXOR[i] || [];
+
     for (let j = i + 1; j < cipherU8a.length; j++) {
-      crossXOR[i] = crossXOR[i] || [];
       crossXOR[i][j] = bitXOR(cipherU8a[i], cipherU8a[j], {
         equalizeLen: "trim",
         direction: "toRight",
@@ -62,65 +106,52 @@ async function main() {
     }
   }
 
-  console.log("--- dumpCrossXOR ---\n", dumpCrossXOR(crossXOR));
+  console.log(`--- dumpCrossXOR ---\n${dumpCrossXOR(crossXOR)}\n`);
 
-  const guessedKey = new Uint8Array(maxTextLen);
-  const guessedMsgs: string[][] = new Array(ciphertexts.length);
+  const guessedKey = new Uint8Array(maxTextLen / 2);
+  const guessedMsgs: string[] = cipherU8a.map((c) => UNKNOWN_CHAR.repeat(c.length));
 
   for (let i = 0; i < crossXOR.length; i++) {
-    // find the length of the longest str as "strLen"
-    let inbound = true;
-    let strOffset = -1;
+    const surface: Uint8Array[] = selectSurface(crossXOR, i);
+    const maxSurfaceLen = surface.reduce((memo, s) => Math.max(memo, s.length), 0);
 
-    while (inbound) {
-      inbound = false;
-      strOffset += 1;
+    for (let strOffset = 0; strOffset < maxSurfaceLen; strOffset++) {
+      if (visibleAlphabetCnt(surface, strOffset) < threshold) continue;
 
-      let alphabetCnt = 0;
+      console.log(
+        `i: ${i}, strOffset: ${strOffset}, alphabetCnt: ${visibleAlphabetCnt(surface, strOffset)}`,
+      );
 
-      for (let j = 0; j < crossXOR.length; j++) {
-        const target = i > j ? crossXOR[j][i] : crossXOR[i][j];
-        if (!target || strOffset >= target.length) continue;
+      // 1. we mark the location for that guessedMsgs be " ", space.
+      guessedMsgs[i] = replaceChar(guessedMsgs[i], strOffset, SPACE_CHAR);
 
-        inbound = true;
+      // 2. we mark the rest of guessedMsgs in that position be the alphabet
+      for (let j = 0; j < surface.length; j++) {
+        const codePt = bitXOR(
+          Uint8Array.from([surface[j].at(strOffset) as number]),
+          Uint8Array.from([SPACE_CODEPOINT]),
+        ).at(0) as number;
+        const msgIdx = j >= i ? j + 1 : j;
 
-        const codePt = target.at(strOffset) as number;
-        if (codePt >= 64 && codePt <= 126) alphabetCnt += 1;
-      }
-
-      if (alphabetCnt < ALPHABET_CNT_THRESHOLD) continue;
-
-      for (let j = 0; j <= crossXOR.length; j++) {
-        guessedMsgs[j] = guessedMsgs[j] || [];
-
-        // 1. we mark the location for that guessedMsgs be " ", space.
-        if (i == j) {
-          guessedMsgs[j][strOffset] = SPACE_CHAR;
-          continue;
-        }
-
-        // 2. we mark the rest of guessedMsgs in that position be the alphabet
-        const target = i > j ? crossXOR[j][i] : crossXOR[i][j];
-        if (!target || strOffset >= target.length) continue;
-
-        const codePt = target.at(strOffset) as number;
-        guessedMsgs[j][strOffset] =
-          codePt >= 64 && codePt <= 126 ? String.fromCharCode(codePt) : UNKNOWN_CHAR;
+        guessedMsgs[msgIdx] = replaceChar(
+          guessedMsgs[msgIdx],
+          strOffset,
+          codePt && codePt >= 64 && codePt <= 126 ? String.fromCodePoint(codePt) : UNKNOWN_CHAR,
+        );
       }
 
       // 3. we mark the streamed cipherkey on that position
       const keyBytes = bitXOR(
-        intArrToU8a([cipherU8a[i].at(strOffset) as number]),
-        intArrToU8a([SPACE_CODEPOINT]),
+        Uint8Array.from([cipherU8a[i].at(strOffset) as number]),
+        Uint8Array.from([SPACE_CODEPOINT]),
       );
 
-      console.log(
-        `Set keypos ${strOffset} from val: ${guessedKey.at(strOffset)} to ${keyBytes.at(0)}`,
-      );
+      console.log(`Set keypos ${strOffset} from val: ${guessedKey.at(strOffset)} to ${keyBytes}`);
+
       guessedKey.set(keyBytes, strOffset);
     } // end of the while(inbound) { /* ... */ } loop
 
-    console.log(`--- dumpMsgsAndKey ${i} ---\n`, dumpMsgsAndKey(guessedMsgs, guessedKey));
+    console.log(`--- dumpMsgsAndKey ${i} ---\n${dumpMsgsAndKey(guessedMsgs, guessedKey)}`);
   }
 }
 
