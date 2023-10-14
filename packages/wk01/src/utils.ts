@@ -5,6 +5,22 @@ interface IBitXOROptions {
 
 const UNPRINTABLE_CHAR = "░";
 
+function utf8ToU8a(str: string): Uint8Array {
+  return Uint8Array.from(Buffer.from(str, "utf8"));
+}
+
+function u8aToUTF8(hex: Uint8Array, sep: string = ""): string {
+  const str = Buffer.from(hex).toString("utf8");
+  let result = "";
+
+  for (let idx = 0; idx < str.length; idx++) {
+    const pc =
+      str.charCodeAt(idx) < 32 || str.charCodeAt(idx) > 126 ? UNPRINTABLE_CHAR : str.charAt(idx);
+    result += pc + (idx === str.length - 1 ? "" : sep);
+  }
+  return result;
+}
+
 function hexStrToU8a(hexString: string): Uint8Array {
   return Uint8Array.from(Buffer.from(hexString, "hex"));
 }
@@ -20,16 +36,15 @@ function u8aToHexStr(hex: Uint8Array, sep: string = ""): string {
   return result;
 }
 
-function u8aToUTF8(hex: Uint8Array, sep: string = ""): string {
-  const str = Buffer.from(hex).toString("utf8");
-  let result = "";
+function intArrToU8a(input: number[]): Uint8Array {
+  return Uint8Array.from(input);
+}
 
-  for (let idx = 0; idx < str.length; idx++) {
-    const pc =
-      str.charCodeAt(idx) < 32 || str.charCodeAt(idx) > 126 ? UNPRINTABLE_CHAR : str.charAt(idx);
-    result += pc + (idx === str.length - 1 ? "" : sep);
-  }
-  return result;
+function u8aToIntArr(hex: Uint8Array): number[] {
+  // TODO
+  hex;
+  throw new Error("To be implemented");
+  return [0];
 }
 
 function bitXOR(
@@ -60,5 +75,5 @@ function bitXOR(
   return result;
 }
 
-export { bitXOR, hexStrToU8a, u8aToHexStr, u8aToUTF8 };
+export { bitXOR, hexStrToU8a, u8aToHexStr, u8aToUTF8, utf8ToU8a, intArrToU8a, u8aToIntArr };
 export type { IBitXOROptions };

@@ -6,3 +6,13 @@ The algorithm
   - in mx and my ith pos, one of them is a space, another one is that upper/lower case letter.
   - if you cross look at different messages of mx and my, you will be able to deduce whether the ith pos of mx is the space char.
   - going back to ith pos of mx. You can deduce the key used for ith pos
+
+notes:
+
+- review the code is good
+- need to count back for those j > i
+
+further learning:
+
+- jsdoc (https://jsdoc.app/about-getting-started.html)
+- tsdoc (https://tsdoc.org/)
