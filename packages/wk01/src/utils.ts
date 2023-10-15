@@ -161,9 +161,17 @@ function getCrossXOR(cipherU8a: Uint8Array[]): Uint8Array[][] {
 }
 
 function getKnownKey(cipherU8a: Uint8Array[], knowledge: Knowledge): [Uint8Array, Uint8Array] {
-  cipherU8a;
-  knowledge;
-  return [new Uint8Array(), new Uint8Array()];
+  const byteLen = Math.max(...cipherU8a.map((c) => c.length));
+  const knownKey = new Uint8Array(byteLen);
+  const knownBytes = new Uint8Array(byteLen);
+
+  knowledge.forEach(([cIdx, offset, origChar]) => {
+    const keyOneByte = cipherU8a[cIdx].at(offset)! ^ origChar.codePointAt(0)!;
+    knownKey.set([keyOneByte], offset);
+    knownBytes.set([255], offset);
+  });
+
+  return [knownKey, knownBytes];
 }
 
 function decipherMsgs(
@@ -172,12 +180,9 @@ function decipherMsgs(
 ): [string[], Uint8Array] {
   const cipherU8a = ciphertexts.map((c) => hexStrToU8a(c));
   const threshold = Math.floor(ciphertexts.length * ALPHABET_CNT_THRESHOLD_PC);
-  const maxTextLen: number = ciphertexts.reduce((memo, c) => Math.max(memo, c.length), 0);
-  const keyLen = maxTextLen / 2;
+  const maxByteLen: number = ciphertexts.reduce((memo, c) => Math.max(memo, c.length), 0) / 2;
 
-  debug(
-    `# of ciphertexts: ${ciphertexts.length}. Threshold: ${threshold}. MaxTextLen: ${maxTextLen}\n`,
-  );
+  debug(`ciphertexts: ${ciphertexts.length} Threshold: ${threshold} maxByteLen: ${maxByteLen}\n`);
   debug(`input ciphers:\n${dump.inputCiphers(ciphertexts)}\n`);
 
   const crossXOR: Uint8Array[][] = getCrossXOR(cipherU8a);
@@ -186,7 +191,7 @@ function decipherMsgs(
 
   const [knownKey, knownBytes]: [Uint8Array, Uint8Array] = knowledge
     ? getKnownKey(cipherU8a, knowledge)
-    : [new Uint8Array(keyLen), new Uint8Array(keyLen)];
+    : [new Uint8Array(maxByteLen), new Uint8Array(maxByteLen)];
 
   debug(`known key:\n${dump.u8a(knownKey)}`);
   debug(`known bytes:\n${dump.u8a(knownBytes)}\n`);
@@ -196,13 +201,13 @@ function decipherMsgs(
 
   // Fill in the [guessedMsgs, guessedKey] first with knownKey and knownBytes
 
-  for (let kIdx = 0; kIdx < keyLen; kIdx++) {
+  for (let kIdx = 0; kIdx < maxByteLen; kIdx++) {
     const knownByte = knownBytes.at(kIdx);
     if (knownByte === undefined || knownByte === 0) continue;
 
     // Set guessedMsgs
     guessedMsgs.forEach((gm, mIdx) => {
-      if (kIdx >= cipherU8a.length) return;
+      if (kIdx >= cipherU8a[mIdx].length) return;
 
       guessedMsgs[mIdx] = replaceChar(
         gm,
