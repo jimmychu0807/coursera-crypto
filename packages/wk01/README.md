@@ -8,11 +8,18 @@ The algorithm
   - going back to ith pos of mx. You can deduce the key used for ith pos
 
 notes:
+  - review the code is good
+  - need to count back for those j > i
 
-- review the code is good
-- need to count back for those j > i
+Todo:
+  - you need test cases
+  - add debug flag to disable the log msg
+  - make the hexString and different conversion into a cmdline program
 
 further learning:
+  - learn documenting your code
+    - jsdoc (https://jsdoc.app/about-getting-started.html)
+    - tsdoc (https://tsdoc.org/)
 
-- jsdoc (https://jsdoc.app/about-getting-started.html)
-- tsdoc (https://tsdoc.org/)
+References:
+  - ASCII table: https://www.asciitable.com/

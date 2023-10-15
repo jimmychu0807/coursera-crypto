@@ -1,9 +1,5 @@
-import { hexStrToU8a, bitXOR, u8aToHexStr, u8aToUTF8, intArrToU8a } from "./utils.js";
-
-const UNKNOWN_CHAR = "░";
-const SPACE_CHAR = " ";
-const SPACE_CODEPOINT = 32;
-const ALPHABET_CNT_THRESHOLD = 8;
+import { decipherMsgs } from "./utils.js";
+import type { Knowledge } from "./utils.js";
 
 const ciphertexts = [
   "315c4eeaa8b5f8aaf9174145bf43e1784b8fa00dc71d885a804e5ee9fa40b16349c146fb778cdf2d3aff021dfff5b403b510d0d0455468aeb98622b137dae857553ccd8883a7bc37520e06e515d22c954eba5025b8cc57ee59418ce7dc6bc41556bdb36bbca3e8774301fbcaa3b83b220809560987815f65286764703de0f3d524400a19b159610b11ef3e",
@@ -19,109 +15,44 @@ const ciphertexts = [
   "32510ba9babebbbefd001547a810e67149caee11d945cd7fc81a05e9f85aac650e9052ba6a8cd8257bf14d13e6f0a803b54fde9e77472dbff89d71b57bddef121336cb85ccb8f3315f4b52e301d16e9f52f904",
 ];
 
-// const toDecrypt =
-//   "32510ba9babebbbefd001547a810e67149caee11d945cd7fc81a05e9f85aac650e9052ba6a8cd8257bf14d13e6f0a803b54fde9e77472dbff89d71b57bddef121336cb85ccb8f3315f4b52e301d16e9f52f904";
+// prettier-ignore
+const knowledge: Knowledge = [
+  [0, 22, "e"], [0, 23, "r"], [0, 41, "c"], [0, 42, "o"],
 
-//ref: ASCII table: https://www.asciitable.com/
+  [1, 17, "b"], [1, 19, "y"], [1, 20, " "], [1, 39, " "], [1, 40, "t"],
 
-function dumpCrossXOR(crossXOR: Uint8Array[][]): string {
-  let outContent = "";
-  for (let i = 0; i < crossXOR.length; i++) {
-    for (let j = 0; j < crossXOR[i].length; j++) {
-      if (!crossXOR[i][j]) continue;
+  [2, 9, "t"], [2, 10, "h"],
 
-      outContent += `m${i} XOR m${j}\n`;
-      outContent += `hexStr: ${u8aToHexStr(crossXOR[i][j])}\n`;
-      outContent += `utf8:   ${u8aToUTF8(crossXOR[i][j], " ")}\n\n`;
-    }
-  }
-  return outContent;
-}
+  [3, 21, "e"], [3, 34, "e"], [3, 35, "n"], [3, 36, "c"], [3, 38, "y"],
 
-function dumpMsgsAndKey(guessedMsgs: string[][], guessedKey: Uint8Array): string {
-  const gms = guessedMsgs.map((oneMsg, idx) => `msg ${idx}: ${oneMsg.join("")}`).join("\n");
-  const gk = u8aToHexStr(guessedKey);
+  [4, 6, "n"], [4, 68, "n"], [4, 70, "s"], [4, 71, "t"], [4, 74, "l"],
 
-  return `guessedMsgs:\n${gms}\nguessedKeys:\n${gk}\n`;
-}
+  [5, 2, "e"], [5, 3, "r"], [5, 5, " "],
+  [5, 30, "r"], [5, 31, "a"], [5, 32, "p"], [5, 33, "h"],
+
+  [6, 54, "e"], [6, 55, " "], [6, 57, "o"], [6, 58, "v"], [6, 60, "r"],
+  [6, 63, "e"], [6, 64, "n"], [6, 66, " "], [6, 69, " "], [6, 73, " "],
+  [6, 78, "e"], [6, 79, " "], [6, 81, "o"], [6, 82, "r"], [6, 83, "c"],
+  [6, 84, "e"],
+
+  [8, 44, "a"], [8, 46, "g"], [8, 49, "i"], [8, 50, "t"], [8, 51, "h"],
+  [8, 53, "s"],
+
+  [9, 25, "n"], [9, 26, "a"], [9, 27, "r"], [9, 28, "y"],
+
+  [10, 7, "r"], [10, 8, "e"],
+  [10, 11, "m"], [10, 12, "e"], [10, 13, "s"], [10, 14, "s"], [10, 17, "e"]
+];
 
 // -- Main Function -- //
 
-async function main() {
-  const cipherU8a = ciphertexts.map((c) => hexStrToU8a(c));
-  const maxTextLen: number = ciphertexts.reduce((memo, c) => Math.max(memo, c.length), 0);
-
-  const crossXOR: Uint8Array[][] = [];
-  for (let i = 0; i < cipherU8a.length; i++) {
-    for (let j = i + 1; j < cipherU8a.length; j++) {
-      crossXOR[i] = crossXOR[i] || [];
-      crossXOR[i][j] = bitXOR(cipherU8a[i], cipherU8a[j], {
-        equalizeLen: "trim",
-        direction: "toRight",
-      });
-    }
-  }
-
-  console.log("--- dumpCrossXOR ---\n", dumpCrossXOR(crossXOR));
-
-  const guessedKey = new Uint8Array(maxTextLen);
-  const guessedMsgs: string[][] = new Array(ciphertexts.length);
-
-  for (let i = 0; i < crossXOR.length; i++) {
-    // find the length of the longest str as "strLen"
-    let inbound = true;
-    let strOffset = -1;
-
-    while (inbound) {
-      inbound = false;
-      strOffset += 1;
-
-      let alphabetCnt = 0;
-
-      for (let j = 0; j < crossXOR.length; j++) {
-        const target = i > j ? crossXOR[j][i] : crossXOR[i][j];
-        if (!target || strOffset >= target.length) continue;
-
-        inbound = true;
-
-        const codePt = target.at(strOffset) as number;
-        if (codePt >= 64 && codePt <= 126) alphabetCnt += 1;
-      }
-
-      if (alphabetCnt < ALPHABET_CNT_THRESHOLD) continue;
-
-      for (let j = 0; j <= crossXOR.length; j++) {
-        guessedMsgs[j] = guessedMsgs[j] || [];
-
-        // 1. we mark the location for that guessedMsgs be " ", space.
-        if (i == j) {
-          guessedMsgs[j][strOffset] = SPACE_CHAR;
-          continue;
-        }
-
-        // 2. we mark the rest of guessedMsgs in that position be the alphabet
-        const target = i > j ? crossXOR[j][i] : crossXOR[i][j];
-        if (!target || strOffset >= target.length) continue;
-
-        const codePt = target.at(strOffset) as number;
-        guessedMsgs[j][strOffset] =
-          codePt >= 64 && codePt <= 126 ? String.fromCharCode(codePt) : UNKNOWN_CHAR;
-      }
-
-      // 3. we mark the streamed cipherkey on that position
-      const keyBytes = bitXOR(
-        intArrToU8a([cipherU8a[i].at(strOffset) as number]),
-        intArrToU8a([SPACE_CODEPOINT]),
-      );
-
-      console.log(
-        `Set keypos ${strOffset} from val: ${guessedKey.at(strOffset)} to ${keyBytes.at(0)}`,
-      );
-      guessedKey.set(keyBytes, strOffset);
-    } // end of the while(inbound) { /* ... */ } loop
-
-    console.log(`--- dumpMsgsAndKey ${i} ---\n`, dumpMsgsAndKey(guessedMsgs, guessedKey));
-  }
+function main() {
+  const [guessedMsgs, guessedKey] = decipherMsgs(ciphertexts, knowledge);
+  console.log(`guessedMsgs:\n`, guessedMsgs);
+  console.log(`guessedKey:\n${guessedKey}`);
 }
 
-await main();
+main();
+
+// Answer of the target ciphertext:
+// The secret message is: When using a stream cipher, never use the key more than once
