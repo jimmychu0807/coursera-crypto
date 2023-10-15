@@ -10,11 +10,11 @@ type Knowledge = [number, number, string][];
 const UNPRINTABLE_CHAR = "░";
 const SPACE_CHAR = " ";
 const SPACE_CODEPOINT = 32;
-const ALPHABET_CNT_THRESHOLD_PC = 0.9;
+const ALPHABET_CNT_THRESHOLD_PC = 0.95;
+// const ALPHABET_CNT_THRESHOLD_PC = 0.8;
 
 const debug = makeDebug("wk01");
 const debugLv2 = makeDebug("wk01:lv2");
-makeDebug.enable("wk01*");
 
 function utf8ToU8a(str: string): Uint8Array {
   return Uint8Array.from(Buffer.from(str, "utf8"));
@@ -36,7 +36,6 @@ function u8aToHexStr(hex: Uint8Array, sep: string = ""): string {
   let result = "";
 
   for (let idx = 0; idx < str.length; idx++) {
-    // sep occur every two chars
     result += str.charAt(idx) + (idx === str.length - 1 || idx % 2 === 0 ? "" : sep);
   }
   return result;
@@ -228,6 +227,8 @@ function decipherMsgs(
     const maxSurfaceLen = surface.reduce((memo, s) => Math.max(memo, s.length), 0);
 
     for (let strOffset = 0; strOffset < maxSurfaceLen; strOffset++) {
+      // We already know the str in that position from pre-existing knowledge
+      if (knownBytes.at(strOffset)! > 0) continue;
       if (visibleAlphabetCnt(surface, strOffset) < threshold) continue;
 
       debugLv2(
