@@ -1,6 +1,7 @@
 {
-  "name": "wk01",
+  "name": "wk02",
   "version": "0.0.0",
+  "description": "",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
