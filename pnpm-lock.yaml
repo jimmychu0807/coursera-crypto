@@ -69,9 +69,6 @@ importers:
       aes-js:
         specifier: 4.0.0-beta.5
         version: 4.0.0-beta.5
-      debug:
-        specifier: ^4.3.4
-        version: 4.3.4(supports-color@8.1.1)
       wk01:
         specifier: workspace:../wk01
         version: link:../wk01

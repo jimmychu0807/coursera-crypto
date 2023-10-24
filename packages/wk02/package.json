@@ -25,7 +25,6 @@
   },
   "dependencies": {
     "aes-js": "4.0.0-beta.5",
-    "debug": "^4.3.4",
     "wk01": "workspace:../wk01"
   }
 }
