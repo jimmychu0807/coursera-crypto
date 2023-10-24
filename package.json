@@ -11,8 +11,9 @@
     "lint": "eslint .",
     "clean": "pnpm --filter \"*\" clean",
     "build": "pnpm --filter \"*\" build",
+    "test": "pnpm --filter \"*\" test",
     "wk01": "pnpm --filter wk01",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "wk02": "pnpm --filter wk02"
   },
   "engines": {
     "node": ">=18"

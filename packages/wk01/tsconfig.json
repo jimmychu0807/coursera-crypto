@@ -14,6 +14,11 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
 
+    /* Emit */
+    "declaration": true,
+    "declarationMap": true,
+    "declarationDir": "dist/@types",
+
     "importHelpers": true
   },
   "include": ["src"],

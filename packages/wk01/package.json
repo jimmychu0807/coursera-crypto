@@ -2,20 +2,20 @@
   "name": "wk01",
   "version": "0.0.0",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/@types/index.d.ts",
   "scripts": {
-    "build": "tsc --project ./tsconfig.json",
+    "build": "pnpm clean && tsc --project ./tsconfig.json",
     "clean": "rm -rf dist",
     "start": "ts-node src/main.ts"
   },
   "devDependencies": {
     "@tsconfig/node18": "^18.2.2",
     "@types/debug": "^4.1.9",
-    "@types/node": "^20.8.4",
+    "@types/node": "^18.18.6",
     "ts-node": "^10.9.1",
     "tslib": "^2.6.2",
-    "typescript": "^5.0.2"
+    "typescript": "^5.2.2"
   },
   "dependencies": {
     "debug": "^4.3.4"
