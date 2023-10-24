@@ -2,10 +2,10 @@
   "name": "wk01",
   "version": "0.0.0",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/@types/index.d.ts",
   "scripts": {
-    "build": "tsc --project ./tsconfig.json",
+    "build": "pnpm clean && tsc --project ./tsconfig.json",
     "clean": "rm -rf dist",
     "start": "ts-node src/main.ts"
   },

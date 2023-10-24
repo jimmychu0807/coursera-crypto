@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer";
 import makeDebug from "debug";
 
 interface IBitXOROptions {
@@ -27,11 +28,11 @@ function u8aToUtf8(hex: Uint8Array, sep: string = ""): string {
   return strArr.join(sep);
 }
 
-function hexStrToU8a(hexStr: string): Uint8Array {
+function hexToU8a(hexStr: string): Uint8Array {
   return Uint8Array.from(Buffer.from(hexStr, "hex"));
 }
 
-function u8aToHexStr(hex: Uint8Array, sep: string = ""): string {
+function u8aToHex(hex: Uint8Array, sep: string = ""): string {
   const str = Buffer.from(hex).toString("hex");
   let result = "";
 
@@ -41,12 +42,12 @@ function u8aToHexStr(hex: Uint8Array, sep: string = ""): string {
   return result;
 }
 
-function hexStrToUtf8(hexStr: string, sep: string = ""): string {
-  return u8aToUtf8(hexStrToU8a(hexStr), sep);
+function hexToUtf8(hexStr: string, sep: string = ""): string {
+  return u8aToUtf8(hexToU8a(hexStr), sep);
 }
 
-function utf8ToHexStr(str: string, sep: string = ""): string {
-  return u8aToHexStr(utf8ToU8a(str), sep);
+function utf8ToHex(str: string, sep: string = ""): string {
+  return u8aToHex(utf8ToU8a(str), sep);
 }
 
 function intArrToU8a(input: number[]): Uint8Array {
@@ -62,14 +63,14 @@ const dump = {
     return ciphertexts
       .map((oneCipher, idx) => {
         const prefix = `msg ${String(idx).padStart(String(ciphertexts.length).length, "0")}: `;
-        return `${prefix}${oneCipher}\n${" ".repeat(prefix.length)}${hexStrToUtf8(oneCipher, " ")}`;
+        return `${prefix}${oneCipher}\n${" ".repeat(prefix.length)}${hexToUtf8(oneCipher, " ")}`;
       })
       .join("\n\n");
   },
 
   // prettier-ignore
   u8a: (input: Uint8Array): string =>
-    `hexStr: ${u8aToHexStr(input)}\n` +
+    `hexStr: ${u8aToHex(input)}\n` +
     `utf8:   ${u8aToUtf8(input, " ")}`,
 
   u8aArr: (input: Uint8Array[]): string => `[\n${input.map((i) => dump.u8a(i)).join("\n\n")}\n]`,
@@ -86,7 +87,7 @@ const dump = {
     return outContent.length >= 2 ? outContent.slice(0, -2) : outContent;
   },
 
-  guessedKey: (guessedKey: Uint8Array): string => u8aToHexStr(guessedKey),
+  guessedKey: (guessedKey: Uint8Array): string => u8aToHex(guessedKey),
 
   guessedMsgs: (guessedMsgs: string[]): string =>
     guessedMsgs
@@ -177,7 +178,7 @@ function decipherMsgs(
   ciphertexts: string[],
   knowledge: Knowledge | undefined,
 ): [string[], Uint8Array] {
-  const cipherU8a = ciphertexts.map((c) => hexStrToU8a(c));
+  const cipherU8a = ciphertexts.map((c) => hexToU8a(c));
   const threshold = Math.floor(ciphertexts.length * ALPHABET_CNT_THRESHOLD_PC);
   const maxByteLen: number = ciphertexts.reduce((memo, c) => Math.max(memo, c.length), 0) / 2;
 
@@ -274,16 +275,16 @@ function decipherMsgs(
 }
 
 export {
-  hexStrToU8a,
-  utf8ToHexStr,
-  hexStrToUtf8,
-  u8aToHexStr,
-  intArrToU8a,
-  u8aToIntArr,
-  u8aToUtf8,
-  utf8ToU8a,
   bitXOR,
   decipherMsgs,
+  hexToU8a,
+  hexToUtf8,
+  intArrToU8a,
+  u8aToHex,
+  u8aToIntArr,
+  u8aToUtf8,
+  utf8ToHex,
+  utf8ToU8a,
 };
 
 export type { IBitXOROptions, Knowledge };
