@@ -1,1 +1,1 @@
-[The week problem set](./problem-set.md)
+problem-set.md
