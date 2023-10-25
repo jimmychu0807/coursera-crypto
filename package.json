@@ -10,7 +10,7 @@
     "fmt": "prettier --write .",
     "lint": "eslint .",
     "clean": "pnpm --filter \"*\" clean",
-    "build": "pnpm --filter \"*\" build",
+    "build": "pnpm wk01 build && pnpm wk02 build",
     "test": "pnpm --filter \"*\" test",
     "wk01": "pnpm --filter wk01",
     "wk02": "pnpm --filter wk02"

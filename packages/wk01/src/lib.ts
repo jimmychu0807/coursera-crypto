@@ -15,7 +15,6 @@ const ALPHABET_CNT_THRESHOLD_PC = 0.95;
 // const ALPHABET_CNT_THRESHOLD_PC = 0.8;
 
 const debug = makeDebug("wk01");
-const debugLv2 = makeDebug("wk01:lv2");
 
 function utf8ToU8a(str: string): Uint8Array {
   return Uint8Array.from(Buffer.from(str, "utf8"));
@@ -29,7 +28,9 @@ function u8aToUtf8(hex: Uint8Array, sep: string = ""): string {
 }
 
 function hexToU8a(hexStr: string): Uint8Array {
-  return Uint8Array.from(Buffer.from(hexStr, "hex"));
+  let processed = hexStr.slice(0, 2) === "0x" ? hexStr.slice(2) : hexStr;
+  processed = processed.length % 2 !== 0 ? `0${processed}` : processed;
+  return Uint8Array.from(Buffer.from(processed, "hex"));
 }
 
 function u8aToHex(hex: Uint8Array, sep: string = ""): string {
@@ -186,9 +187,6 @@ function decipherMsgs(
   debug(`input ciphers:\n${dump.inputCiphers(ciphertexts)}\n`);
 
   const crossXOR: Uint8Array[][] = getCrossXOR(cipherU8a);
-
-  debugLv2(`CrossXOR:\n${dump.crossXOR(crossXOR)}\n`);
-
   const [knownKey, knownBytes]: [Uint8Array, Uint8Array] = knowledge
     ? getKnownKey(cipherU8a, knowledge)
     : [new Uint8Array(maxByteLen), new Uint8Array(maxByteLen)];
@@ -223,18 +221,12 @@ function decipherMsgs(
 
   for (let i = 0; i < crossXOR.length; i++) {
     const surface: Uint8Array[] = selectSurface(crossXOR, i);
-    debugLv2(`surface:`, dump.u8aArr(surface));
-
     const maxSurfaceLen = surface.reduce((memo, s) => Math.max(memo, s.length), 0);
 
     for (let strOffset = 0; strOffset < maxSurfaceLen; strOffset++) {
       // We already know the str in that position from pre-existing knowledge
       if (knownBytes.at(strOffset)! > 0) continue;
       if (visibleAlphabetCnt(surface, strOffset) < threshold) continue;
-
-      debugLv2(
-        `i: ${i}, strOffset: ${strOffset}, alphabetCnt: ${visibleAlphabetCnt(surface, strOffset)}`,
-      );
 
       // 1. we mark the location for that guessedMsgs be " ", space.
       guessedMsgs[i] = replaceChar(guessedMsgs[i], strOffset, SPACE_CHAR);
@@ -260,10 +252,8 @@ function decipherMsgs(
         Uint8Array.from([SPACE_CODEPOINT]),
       );
 
-      debugLv2(`Set keypos ${strOffset} from val: ${guessedKey.at(strOffset)} to ${keyBytes}`);
-
       guessedKey.set(keyBytes, strOffset);
-    } // end of the while(inbound) { /* ... */ } loop
+    }
 
     debug(
       `iteration ${i}\nguessedMsgs\n${dump.guessedMsgs(guessedMsgs)}\n` +
