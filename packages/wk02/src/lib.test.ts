@@ -1,5 +1,11 @@
 import { expect } from "chai";
-import { aes_cbc_encrypt, aes_cbc_decrypt, privateMethods } from "./lib.js";
+import {
+  aes_cbc_encrypt,
+  aes_cbc_decrypt,
+  privateMethods,
+  aes_ctr_encrypt,
+  aes_ctr_decrypt,
+} from "./lib.js";
 
 // prettier-ignore
 const TEST_CASES = {
@@ -57,7 +63,7 @@ describe("aes_cbc_encrypt(), aes_cbc_decrypt()", function () {
 });
 
 describe("bitIncrement", function () {
-  it("works for simple case", function () {
+  it("works for a few test cases", function () {
     const { bitIncrement } = privateMethods;
     // prettier-ignore
     const testCases = [
@@ -70,6 +76,21 @@ describe("bitIncrement", function () {
     testCases.forEach((tc) => {
       bitIncrement(tc.test);
       expect(tc.test).to.be.eql(tc.expect);
+    });
+  });
+});
+
+describe("aes_ctr_encrypt(), aes_ctr_decrypt()", function () {
+  it("works for all test cases", function () {
+    const key = new Uint8Array(16);
+    key.fill(1, 0, 16);
+
+    Object.values(TEST_CASES).forEach((tc) => {
+      const encryptedBytes = aes_ctr_encrypt(tc, key);
+      expect(encryptedBytes.length).to.be.equal(BLOCK_SIZE + tc.length);
+
+      const decryptedBytes = aes_ctr_decrypt(encryptedBytes, key);
+      expect(decryptedBytes).to.be.eql(tc);
     });
   });
 });

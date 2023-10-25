@@ -107,7 +107,6 @@ const MASKS = [1, 2, 4, 8, 16, 32, 64, 128];
 const XOR_TARGETS = [1, 3, 7, 15, 31, 63, 127, 255];
 
 function bitIncrement(bytes: Uint8Array): void {
-  // NX> implement bitIncrement
   let bitCnt = 0;
   let byteCnt = bytes.length - 1;
 
