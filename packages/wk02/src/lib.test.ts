@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { aes_cbc_encrypt, aes_cbc_decrypt } from "./lib.js";
+import { aes_cbc_encrypt, aes_cbc_decrypt, privateMethods } from "./lib.js";
 
 // prettier-ignore
 const TEST_CASES = {
@@ -53,5 +53,23 @@ describe("aes_cbc_encrypt(), aes_cbc_decrypt()", function () {
 
     const decryptedBytes = aes_cbc_decrypt(encryptedBytes, key);
     expect(decryptedBytes).to.be.eql(TEST_CASES.SEVENTEEN_BYTES);
+  });
+});
+
+describe("bitIncrement", function () {
+  it("works for simple case", function () {
+    const { bitIncrement } = privateMethods;
+    // prettier-ignore
+    const testCases = [
+      { test: new Uint8Array([1]), expect: new Uint8Array([2]) },
+      { test: new Uint8Array([254]), expect: new Uint8Array([255]) },
+      { test: new Uint8Array([0, 0, 255]), expect: new Uint8Array([0, 1, 0]) },
+      { test: new Uint8Array([3, 255, 255]), expect: new Uint8Array([4, 0, 0]) },
+    ]
+
+    testCases.forEach((tc) => {
+      bitIncrement(tc.test);
+      expect(tc.test).to.be.eql(tc.expect);
+    });
   });
 });

@@ -107,13 +107,35 @@ const MASKS = [1, 2, 4, 8, 16, 32, 64, 128];
 const XOR_TARGETS = [1, 3, 7, 15, 31, 63, 127, 255];
 
 function bitIncrement(bytes: Uint8Array): void {
-  MASKS;
-  XOR_TARGETS;
-  bytes;
-
   // NX> implement bitIncrement
-  // let mask = 1;
-  // let xorVal = 1;
+  let bitCnt = 0;
+  let byteCnt = bytes.length - 1;
+
+  while (byteCnt >= 0) {
+    const byte = bytes.at(byteCnt) as number;
+    if ((byte & MASKS[bitCnt]) === 0) {
+      bytes.set([byte ^ XOR_TARGETS[bitCnt]], byteCnt);
+      if (byteCnt + 1 < bytes.length) bytes.fill(0, byteCnt + 1, bytes.length);
+      return;
+    }
+
+    // increment counter
+    bitCnt += 1;
+    if (bitCnt >= MASKS.length) {
+      byteCnt -= 1;
+      bitCnt = 0;
+    }
+  }
+
+  throw new Error(`${bytes} is overflowed when incremented by 1`);
 }
 
-export { aes_cbc_encrypt, aes_cbc_decrypt, aes_ctr_encrypt, aes_ctr_decrypt };
+// Export functions only during in TEST environment
+// ref: https://stackoverflow.com/a/57212354/523060
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let privateMethods: { [key: string]: any } = {};
+if (process.env.NODE_ENV === "test") {
+  privateMethods = { bitIncrement };
+}
+
+export { aes_cbc_encrypt, aes_cbc_decrypt, aes_ctr_encrypt, aes_ctr_decrypt, privateMethods };
