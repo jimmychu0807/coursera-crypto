@@ -1,7 +1,7 @@
 {
-  "name": "wk02",
+  "name": "wk03",
   "version": "0.0.0",
-  "description": "",
+  "description": "Coursera Crypto Week 3 Assignment",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -12,7 +12,6 @@
     "test": "NODE_OPTIONS='--loader ts-node/esm --no-warnings' mocha"
   },
   "dependencies": {
-    "aes-js": "4.0.0-beta.5",
     "wk01": "workspace:../wk01"
   },
   "devDependencies": {
