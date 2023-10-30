@@ -1,7 +1,6 @@
 import { stat } from "node:fs/promises";
 import { createReadStream } from "node:fs";
 import { createHash } from "node:crypto";
-import { u8aToHex } from "wk01";
 
 const DEFAULT_BLOCK = 1024;
 const BUFFER_SIZE = 1024;
@@ -38,10 +37,6 @@ async function streamHash(
   const fstat = await stat(filePath);
   const fSize = fstat.size;
   const numBlocks = Math.ceil(fSize / blockSize);
-
-  console.log(`file size: ${fSize}, total blocks: ${numBlocks}`);
-
-  const hash = createHash("sha256");
   let digest = undefined;
 
   for (let bIdx = numBlocks - 1; bIdx >= 0; bIdx--) {
@@ -51,25 +46,14 @@ async function streamHash(
       Math.min((bIdx + 1) * blockSize, fSize),
     );
 
-    console.log(
-      `block: ${bIdx}. Range from: ${bIdx * blockSize} to: ${Math.min(
-        (bIdx + 1) * blockSize,
-        fSize,
-      )}`,
-    );
-    console.log(`  read in:`, u8aToHex(chunk));
-
     if (digest) {
       const concat = new Uint8Array(chunk.length + digest.length);
       concat.set(chunk, 0);
       concat.set(digest, concat.length - digest.length);
       chunk = new Uint8Array(concat);
     }
-    hash.update(chunk);
-    digest = hash.copy().digest();
 
-    console.log(`  chunkSize before hashing: ${chunk.length}. chunk`, u8aToHex(chunk));
-    console.log(`  digest: ${u8aToHex(digest)}`);
+    digest = createHash("sha256").update(chunk).digest();
   }
   return digest as Uint8Array;
 }

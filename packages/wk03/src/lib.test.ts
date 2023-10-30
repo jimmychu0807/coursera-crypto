@@ -12,8 +12,10 @@ const testBytes = new Uint8Array([
   0, 1, 2, 3, 4,
   5, 6, 7, 8, 9,
 ]);
+const tBDigest = "1f825aa2f0020ef7cf91dfa30da4668d791c5d4824fc8e41354b89ec05795ab3";
 
 const testLongBytes = new Uint8Array([...Array(1025).keys()]);
+const tLBDigest = "d61e7c13c5729978f25bcbd1ce2a36cfd0830502ce10250d7233d7cfda5e6646";
 
 describe("readFileBytes()", function () {
   let tdir: string | undefined;
@@ -43,7 +45,7 @@ describe("streamHash()", function () {
   let tFilePath: string | undefined;
   let tLgFilePath: string | undefined;
   const testVideo = join(dirname(fileURLToPath(import.meta.url)), "../assets/test.mp4");
-  const expectedDigest = "03c08f4ee0b576fe319338139c045c89c3e8e9409633bea29442e21425006ea8";
+  const tVDigest = "03c08f4ee0b576fe319338139c045c89c3e8e9409633bea29442e21425006ea8";
 
   before(async function () {
     tdir = await mkdtemp(join(tmpdir(), "wk03-"));
@@ -55,22 +57,15 @@ describe("streamHash()", function () {
   });
 
   it("works for a small file", async () => {
-    const digest = await streamHash(tFilePath as string);
-    console.log(digest);
-    console.log(u8aToHex(digest));
+    expect(u8aToHex(await streamHash(tFilePath as string))).to.be.eql(tBDigest);
   });
 
   it("works for a large file", async () => {
-    const digest = await streamHash(tLgFilePath as string);
-    console.log(digest);
-    console.log(u8aToHex(digest));
+    expect(u8aToHex(await streamHash(tLgFilePath as string))).to.be.eql(tLBDigest);
   });
 
   it("works for the test video", async function () {
-    testVideo;
-    expectedDigest;
-    // const digest = await streamHash(testVideo);
-    // expect(u8aToHex(digest)).to.eql(expectedDigest);
+    expect(u8aToHex(await streamHash(testVideo))).to.be.eql(tVDigest);
   });
 
   after(async () => tdir && (await rm(tdir, { recursive: true, force: true })));
