@@ -1,8 +1,6 @@
-- **Use [Deno](https://deno.com/) on wk04**
-
 In this project you will experiment with a padding oracle attack against a toy web site hosted at <https://crypto-class.appspot.com>. Padding oracle vulnerabilities affect a wide variety of products, including [secure tokens](http://arstechnica.com/security/2012/06/securid-crypto-attack-steals-keys/).
 
-This project will show how they can be exploited. We discussed CBC padding oracle attacks in week 4 ([segment number 6]()), but if you want to read more about them, see a [short description here]() or [Vaudenay's paper]() on this topic.
+This project will show how they can be exploited. We discussed CBC padding oracle attacks in week 4 ([segment number 6](https://www.coursera.org/learn/crypto/lecture/8s23o/cbc-padding-attacks)), but if you want to read more about them, see a [short description here](https://crypto.stanford.edu/~dabo/cryptobook/BonehShoup_0_4.pdf#page=373) or [Vaudenay's paper](http://www.iacr.org/archive/eurocrypt2002/23320530/cbc02_e02d.pdf) on this topic.
 
 Now to business. Suppose an attacker wishes to steal secret information from our [target web site](https://crypto-class.appspot.com). The attacker suspects that the web site embeds encrypted customer data in URL parameters such as this:
 
@@ -20,7 +18,7 @@ Armed with this information your goal is to decrypt the ciphertext listed above.
 http://crypto-class.appspot.com/po?er="your ciphertext here"
 ```
 
-and observe the resulting error code. The padding oracle will let you decrypt the given ciphertext one byte at a time. To decrypt a single byte you will need to send up to 256 HTTP requests to the site.  Keep in mind that the first ciphertext block is the random IV. The decrypted message is ASCII encoded.
+and observe the resulting error code. The padding oracle will let you decrypt the given ciphertext one byte at a time. To decrypt a single byte you will need to send up to 256 HTTP requests to the site. Keep in mind that the first ciphertext block is the random IV. The decrypted message is ASCII encoded.
 
 To get you started here is a [short Python script](http://spark-university.s3.amazonaws.com/stanford-crypto/projects/pp4-attack_py.html) that sends a ciphertext supplied on the command line to the site and prints the resulting error code. You can extend this script (or write one from scratch) to implement the padding oracle attack. Once you decrypt the given ciphertext, please enter the decrypted message in the box below.
 
