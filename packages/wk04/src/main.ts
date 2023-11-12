@@ -1,7 +1,5 @@
 import fetch from "node-fetch";
-
 import { hexToU8a, bitXOR, u8aToHex } from "wk01";
-import type { IBitXOROptions } from "wk01";
 
 const TARGET_URL = "http://crypto-class.appspot.com/po";
 const PARAM_K = "er";
@@ -21,48 +19,78 @@ function splitToBlocks(input: string, len: number): Uint8Array[] {
   return res;
 }
 
-// function clone(src: Uint8Array): Uint8Array {
-//   const dst = new ArrayBuffer(src.byteLength);
-//   const res = new Uint8Array(dst);
-//   res.set(new Uint8Array(src));
-//   return res;
-// }
-
 async function main() {
   // Break it into 4 16-byte block
   const blocks = splitToBlocks(INTERCEPTED_V, BLOCK_LEN);
+  blocks.forEach((b, i) => console.log(`b${i}: ${u8aToHex(b)}`));
 
-  console.log(blocks);
-
-  const xorOpts: IBitXOROptions = {
-    equalizeLen: "expand",
-    direction: "toLeft",
-  };
+  const messageBytes = new Uint8Array((INTERCEPTED_V.length - BLOCK_LEN) / 2);
 
   for (let blkIdx = blocks.length - 2; blkIdx >= 0; blkIdx--) {
     const bitFlipBlk = blocks[blkIdx];
 
-    // guess from the last bit
-    const byteIdx = 0;
-    const guess = 0;
-    while (guess < 256) {
-      let xored = bitXOR(bitFlipBlk, new Uint8Array([guess]), xorOpts);
-      xored = bitXOR(xored, new Uint8Array([byteIdx + 1]), xorOpts);
-      const replacedV = hexToU8a(INTERCEPTED_V);
-      replacedV.set(xored, blkIdx * BLOCK_BYTES);
+    // guess from the last bytes
+    for (let byteIdx = BLOCK_BYTES - 1; byteIdx >= 0; byteIdx--) {
+      let respNon403 = false;
 
-      // Sending the request out
-      const params = new URLSearchParams();
-      params.append(PARAM_K, u8aToHex(replacedV));
+      for (let guess = 0; guess < 256; guess++) {
+        console.log(`\nblkIdx: ${blkIdx}, byteIdx: ${byteIdx}, guess: ${guess}`);
 
-      console.log("params:", params.toString());
+        // xor first with the guess
+        const guessBytes = new Uint8Array(BLOCK_BYTES);
+        guessBytes.set([guess], byteIdx);
+        if (byteIdx < BLOCK_BYTES - 1) {
+          // copy messageBytes over to guessBytes
+          const messageBlkBytes = messageBytes.slice(
+            blkIdx * BLOCK_BYTES,
+            (blkIdx + 1) * BLOCK_BYTES,
+          );
+          guessBytes.set(messageBlkBytes.slice(byteIdx + 1), byteIdx + 1);
+        }
 
-      const resp = await fetch(TARGET_URL + `?${params.toString()}`);
-      console.log("resp", resp);
+        let xored = bitXOR(bitFlipBlk, guessBytes);
 
-      process.exit();
-    }
-  }
+        // xor with the padding bytes
+        const padInt = BLOCK_BYTES - byteIdx;
+        const padBytes = new Uint8Array(BLOCK_BYTES);
+        padBytes.fill(padInt, byteIdx, BLOCK_BYTES);
+
+        console.log(`bitFlipBlk: ${u8aToHex(bitFlipBlk)}`);
+        console.log(`guessBytes: ${u8aToHex(guessBytes)}`);
+        console.log(`padBytes:   ${u8aToHex(padBytes)}`);
+
+        // xor result
+        xored = bitXOR(xored, padBytes);
+
+        const replacedV = hexToU8a(INTERCEPTED_V);
+        replacedV.set(xored, blkIdx * BLOCK_BYTES);
+
+        // Sending the request out
+        const params = new URLSearchParams();
+        params.append(PARAM_K, u8aToHex(replacedV));
+
+        console.log("fetch:  ", params.toString());
+        const resp = await fetch(TARGET_URL + `?${params.toString()}`);
+
+        if (resp.status !== 403) {
+          respNon403 = true;
+          // we know it is a valid pad
+          const { status, statusText } = resp;
+          console.log(`resp: ${status}, ${statusText}`);
+          messageBytes.set([guess], blkIdx * BLOCK_BYTES + byteIdx);
+          break;
+        }
+      } // end of "guess" for-loop
+
+      if (!respNon403) {
+        throw new Error(`blkIdx: ${blkIdx}, byteIdx: ${byteIdx}: no guess from 0..255 work`);
+      }
+
+      console.log(`message: ${u8aToHex(messageBytes)}`);
+    } // end of "byteIdx" for-loop
+
+    process.exit();
+  } // end of "blkIdx" for-loop
 }
 
 main().catch(console.error);
