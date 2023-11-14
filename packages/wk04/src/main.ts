@@ -1,12 +1,12 @@
 import fetch from "node-fetch";
 import type { Response } from "node-fetch";
-import { hexToU8a, bitXOR, u8aToHex } from "wk01";
+import { hexToU8a, bitXOR, u8aToHex, u8aToUtf8 } from "wk01";
 
+const DEBUG = false;
 const TARGET_URL = "http://crypto-class.appspot.com/po";
 const PARAM_K = "er";
 const INTERCEPTED_V =
   "f20bdba6ff29eed7b046d1df9fb7000058b1ffb4210a580f748b4ac714c001bd4a61044426fb515dad3f21f18aa577c0bdf302936266926ff37dbf7035d5eeb4";
-
 const BLOCK_LEN = 32; // this is the string length
 const BLOCK_BYTES = BLOCK_LEN / 2;
 
@@ -20,13 +20,6 @@ function splitToBlocks(input: string, len: number): Uint8Array[] {
   return res;
 }
 
-// function clone(src: Uint8Array): Uint8Array {
-//   const dst = new ArrayBuffer(src.byteLength);
-//   const res = new Uint8Array(dst);
-//   res.set(new Uint8Array(src));
-//   return res;
-// }
-
 type Params = {
   guess: number;
   guessBytes: Uint8Array;
@@ -37,11 +30,14 @@ type Params = {
 };
 
 function debugStruct(paramArr: Params[]) {
-  paramArr.forEach((p) => {
-    console.log(`guess: ${p.guess}, guessBytes: ${u8aToHex(p.guessBytes)}`);
-    console.log(`xored: ${u8aToHex(p.xored)}`);
-    console.log(`tampe: ${u8aToHex(p.tampered)}`);
-    console.log(`repla: ${p.replacedV}\n`);
+  paramArr.forEach((p, idx) => {
+    if (idx === 0 || idx === 100 || idx === 200 || idx === 255) {
+      console.log(`guess: ${u8aToHex(p.guessBytes)}`);
+      console.log(`padB:  ${u8aToHex(p.padBytes)}`);
+      console.log(`xored: ${u8aToHex(p.xored)}`);
+      console.log(`tampe: ${u8aToHex(p.tampered)}`);
+      console.log(`repla: ${p.replacedV}\n`);
+    }
   });
 }
 
@@ -51,6 +47,10 @@ async function main() {
   const messageBytes = new Uint8Array((INTERCEPTED_V.length - BLOCK_LEN) / 2);
 
   for (let blkIdx = 0; blkIdx < blocks.length - 1; blkIdx++) {
+    const targetV = new Uint8Array(BLOCK_BYTES * 2);
+    targetV.set(blocks[blkIdx], 0);
+    targetV.set(blocks[blkIdx + 1], BLOCK_BYTES);
+
     const bitFlipBlk = blocks[blkIdx];
 
     // guess from the last bytes
@@ -77,15 +77,8 @@ async function main() {
 
         const xored = bitXOR(guessBytes, padBytes);
         const tampered = bitXOR(bitFlipBlk, xored);
-
-        // console.log(`bitFlipBlk: ${u8aToHex(bitFlipBlk)}`);
-        // console.log(`guessBytes: ${u8aToHex(guessBytes)}`);
-        // console.log(`padBytes:   ${u8aToHex(padBytes)}`);
-        // console.log(`xored:      ${u8aToHex(xored)}`);
-        // console.log(`tampered:   ${u8aToHex(tampered)}`);
-
-        const replacedV = hexToU8a(INTERCEPTED_V).slice(0, (blkIdx + 2) * BLOCK_BYTES);
-        replacedV.set(tampered, blkIdx * BLOCK_BYTES);
+        const replacedV = targetV.slice(0);
+        replacedV.set(tampered, 0);
 
         paramArr.push({
           guess,
@@ -97,7 +90,7 @@ async function main() {
         });
       }
 
-      debugStruct(paramArr);
+      if (DEBUG) debugStruct(paramArr);
 
       const promises: Promise<{ guess: number; resp: Response }>[] = paramArr.map((param) => {
         const { guess, replacedV } = param;
@@ -111,17 +104,26 @@ async function main() {
         [],
       );
 
-      if (res404.length !== 1)
+      if (res404.length <= 0)
         throw new Error(
           `blkIdx: ${blkIdx}, byteIdx: ${byteIdx}: there are ${res404.length} 404 results`,
         );
 
-      messageBytes.set([res404[0].guess], blkIdx * BLOCK_BYTES + byteIdx);
+      if (res404.length > 1)
+        console.log(
+          `res404 len: ${res404.length}. guesses:`,
+          res404.map((r) => r.guess),
+        );
+
+      // note: hard coded here to use the last correct guess
+      messageBytes.set([res404[res404.length - 1].guess], blkIdx * BLOCK_BYTES + byteIdx);
       console.log(`message: ${u8aToHex(messageBytes)}`);
     } // end of "byteIdx" for-loop
-
-    // process.exit();
   } // end of "blkIdx" for-loop
+
+  const lastByte = messageBytes.at(messageBytes.length - 1) as number;
+  const sliced = messageBytes.slice(0, messageBytes.length - lastByte);
+  console.log(`Decrypted message: ${u8aToUtf8(sliced)}`);
 }
 
 main().catch(console.error);

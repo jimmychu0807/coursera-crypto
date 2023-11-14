@@ -24,4 +24,4 @@ To get you started here is a [short Python script](http://spark-university.s3.am
 
 This project shows that when using encryption you must prevent padding oracle attacks by either using encrypt-then-MAC as in EAX or GCM, or if you must use MAC-then-encrypt then ensure that the site treats padding errors the same way it treats MAC errors.
 
-Answer here.
+Answer here: **The Magic Words are Squeamish Ossifrage**

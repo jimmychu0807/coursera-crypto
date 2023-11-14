@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "Coursera Crypto Week 4 Assignment",
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/main.js",
   "scripts": {
     "build": "pnpm clean && tsc --project ./tsconfig.json",
     "clean": "rm -rf dist",
