@@ -92,13 +92,17 @@ async function main() {
 
       if (DEBUG) debugStruct(paramArr);
 
+      // Run a bunch of fetches altogether instead of waiting for each fetch complete one by one.
       const promises: Promise<{ guess: number; resp: Response }>[] = paramArr.map((param) => {
         const { guess, replacedV } = param;
         return fetch(TARGET_URL + `?${PARAM_K}=${replacedV}`).then((resp) => ({ guess, resp }));
       });
 
+      // go! go! go! 🚀
       const settled = await Promise.allSettled(promises);
+
       const res404 = settled.reduce(
+        // filter to get the inner value
         (acc: { guess: number; resp: Response }[], r) =>
           r.status === "fulfilled" && r.value.resp.status === 404 ? [...acc, r.value] : acc,
         [],
@@ -109,13 +113,14 @@ async function main() {
           `blkIdx: ${blkIdx}, byteIdx: ${byteIdx}: there are ${res404.length} 404 results`,
         );
 
+      // there is a case that there are multiple padding bytes that are correct
       if (res404.length > 1)
         console.log(
           `res404 len: ${res404.length}. guesses:`,
           res404.map((r) => r.guess),
         );
 
-      // note: hard coded here to use the last correct guess
+      // hard coded here to use the last correct guess
       messageBytes.set([res404[res404.length - 1].guess], blkIdx * BLOCK_BYTES + byteIdx);
       console.log(`message: ${u8aToHex(messageBytes)}`);
     } // end of "byteIdx" for-loop
