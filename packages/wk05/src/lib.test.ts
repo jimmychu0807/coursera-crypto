@@ -10,31 +10,40 @@ const testCases = {
 const inverseModCases = {
   simple: { p: BigInt(19), num: BigInt(7), inverse: BigInt(11) },
   hard: { p: BigInt(757958891), num: BigInt(89512483), inverse: BigInt(99593840) },
-}
+};
 
 function getLimitfromAns(num: bigint): bigint {
-  return BigInt(Math.floor(Math.ceil(Math.log2( Number(num) ))/2));
+  return BigInt(Math.ceil(Math.sqrt(Number(num))));
 }
 
-describe("test inverseModFunc", function() {
-  it("works on simple case", function() {
+describe("test inverseModFunc", function () {
+  it("works on simple case", function () {
     const tc = inverseModCases.simple;
     const inverseModP = inverseModFunc(tc.p);
     expect(inverseModP(tc.num)).to.eql(tc.inverse);
   });
 
-  it("works on hard case", function() {
-    const tc = inverseModCases.hard;
-    const inverseModP = inverseModFunc(tc.p);
-    expect(inverseModP(tc.num)).to.eql(tc.inverse);
+  it("works on all cases", function () {
+    for (const tc of Object.values(inverseModCases)) {
+      const inverseModP = inverseModFunc(tc.p);
+      expect(inverseModP(tc.num)).to.eql(tc.inverse);
+    }
   });
 });
 
 describe("test DiscreteLogSolver", function () {
-  it("works with a simple case", function() {
+  it("works with a simple case", function () {
     const sc = testCases.smallX;
     const solver = new DiscreteLogSolver(getLimitfromAns(sc.x));
     const res = solver.solve(sc.p, sc.g, sc.h);
     expect(res).to.deep.equal(sc.x);
+  });
+
+  it("works on all cases", function () {
+    for (const tc of Object.values(testCases)) {
+      const solver = new DiscreteLogSolver(getLimitfromAns(tc.x));
+      const res = solver.solve(tc.p, tc.g, tc.h);
+      expect(res).to.deep.equal(tc.x);
+    }
   });
 });
