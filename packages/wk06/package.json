@@ -1,7 +1,7 @@
 {
-  "name": "wk05",
+  "name": "wk06",
   "version": "0.0.0",
-  "description": "Coursera Crypto Week 5 Assignment",
+  "description": "Coursera Crypto Week 6 Assignment",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -9,7 +9,10 @@
     "build": "pnpm clean && tsc --project ./tsconfig.json",
     "clean": "rm -rf dist",
     "start": "ts-node src/main.ts",
-    "test": "NODE_OPTIONS='--loader ts-node/esm --no-warnings' mocha"
+    "test": "tsc --project ./tsconfig.json"
+  },
+  "dependencies": {
+    "wk01": "workspace:../wk01"
   },
   "devDependencies": {
     "@tsconfig/node18": "^18.2.2",
