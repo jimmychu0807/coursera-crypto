@@ -4,7 +4,7 @@ const DEBUG_INVERSE = false;
 const DEBUG_SOLVER = false;
 
 // default trial limit
-const TRIAL_LMT = BigInt(2) ** BigInt(20);
+const TRIAL_LMT = BigInt(2 ** 20);
 
 const modFunc = (p: bigint) => (num: bigint) => {
   let inter = num;
@@ -68,30 +68,38 @@ const inverseModFunc = (p: bigint) => (num: bigint) => {
   return BigInt(modFunc(p)(n));
 };
 
+const getExpMapKey = (num: bigint, exp: bigint, p: bigint) => [num, exp, p].join(",");
+
 class DiscreteLogSolver {
   protected limit: bigint;
+  protected expMap: Map<string, bigint>;
 
   constructor(limit?: bigint) {
     this.limit = limit || TRIAL_LMT;
+    this.expMap = new Map();
   }
 
   public solve(p: bigint, g: bigint, h: bigint): bigint | undefined {
     DEBUG_SOLVER && console.log(`p: ${p}, g: ${g}, h: ${h}`);
-    DEBUG_SOLVER && console.log(`TRIAL_LMT: ${this.limit}`);
+    DEBUG_SOLVER && console.log(`limit: ${this.limit}`);
 
     const modP = modFunc(p);
 
     // building a hash table
     // epiphany note: you cannot just do a plain division here. You need to use euclid algo to find the inverse of (g**input) mod p
     const leftSideMap = this.buildMapping(p, g, h);
-
     DEBUG_SOLVER && console.log(`leftSideMap`, leftSideMap);
 
     // we are looking to solve the equation:
     //  h / (g ** x1) = (g ** B) ** x0 in Zp
     //  where h, g, B are all known
     const gB = modP(g ** this.limit);
-    for (let x0 = BigInt(0); x0 < BigInt(this.limit); x0++) {
+
+    const milli = this.limit / BigInt(1000);
+    let progress = 0;
+    for (let x0 = BigInt(0); x0 < this.limit; x0++) {
+      if (milli > 0 && x0 % milli === BigInt(0)) console.log(`solving: ${progress++}/1000`);
+
       const rs = modP(gB ** x0);
       if (leftSideMap.has(rs)) {
         // we found the solution here, with x0 and x1
@@ -106,14 +114,46 @@ class DiscreteLogSolver {
   protected buildMapping(p: bigint, g: bigint, h: bigint): Map<bigint, bigint> {
     const modP = modFunc(p);
     const inverseModP = inverseModFunc(p);
-
     const map = new Map();
 
+    const milli = this.limit / BigInt(1000);
+    let progress = 0;
     for (let i = BigInt(0); i < this.limit; i++) {
+      if (milli > 0 && i % milli === BigInt(0)) console.log(`buildMapping: ${progress++}/1000`);
+
       const res = modP(h * inverseModP(modP(g ** i)));
       map.set(res, i);
     }
     return map;
+  }
+
+  public expModP(num: bigint, exp: bigint, p: bigint): bigint {
+    const modP = modFunc(p);
+
+    let dividend = exp;
+    let ans = BigInt(1);
+    let bit = BigInt(1);
+    let term = BigInt(0);
+    while (dividend >= 1) {
+      // calculate the (num**exp) modP, and put
+      const expMapKey = getExpMapKey(num, bit, p);
+      if (!this.expMap.has(expMapKey)) {
+        term = bit === BigInt(1) ? modP(num) : modP(term * term);
+        this.expMap.set(expMapKey, term);
+      } else {
+        term = this.expMap.get(expMapKey) as bigint;
+      }
+
+      const quotient = dividend / BigInt(2);
+      if (quotient * BigInt(2) !== dividend) {
+        // the remainder is 1
+        ans = modP(ans * term);
+      }
+
+      dividend = quotient;
+      bit += BigInt(1);
+    }
+    return ans;
   }
 }
 
