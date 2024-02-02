@@ -11,9 +11,6 @@
     "start": "ts-node src/main.ts",
     "test": "NODE_OPTIONS='--loader ts-node/esm --no-warnings' mocha"
   },
-  "dependencies": {
-    "wk01": "workspace:../wk01"
-  },
   "devDependencies": {
     "@tsconfig/node18": "^18.2.2",
     "@types/chai": "^4.3.9",
