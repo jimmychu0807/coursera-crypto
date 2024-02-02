@@ -1,14 +1,16 @@
 # Week 06
 
 - source: https://www.coursera.org/learn/crypto/quiz/cZHEY/week-6-programming-assignment-optional
+
 - problem
+
    ![01a](assets/01a.png)
    ![01b](assets/01b.png)
 
 
 - Factoring challenge #1:
 
-   ![fc-1](assedts/fc-1.png)
+   ![fc-1](assets/fc-1.png)
 
    ```
    N = 17976931348623159077293051907890247336179769789423065727343008115 \
@@ -20,7 +22,7 @@
 
 - Factoring challenge #2:
 
-   ![fc-2](assedts/fc-2.png)
+   ![fc-2](assets/fc-2.png)
 
    ```
    N = 6484558428080716696628242653467722787263437207069762630604390703787 \
@@ -32,7 +34,7 @@
 
 - Factoring challenge #3:
 
-   ![fc-3](assedts/fc-3.png)
+   ![fc-3](assets/fc-3.png)
 
    ```
    N = 72006226374735042527956443552558373833808445147399984182665305798191 \
@@ -44,7 +46,7 @@
 
 - Problem #4:
 
-   ![p-4](assedts/p-4.png)
+   ![p-4](assets/p-4.png)
 
    ```
    Challenge ciphertext (as a decimal integer):
