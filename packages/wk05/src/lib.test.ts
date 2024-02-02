@@ -2,21 +2,21 @@ import { expect } from "chai";
 import DiscreteLogSolver, { inverseModFunc } from "./lib.js";
 
 const testCases = {
-  small: { p: BigInt(757958891), g: BigInt(89512483), h: BigInt(425341755), x: BigInt(31) },
-  mid: { p: BigInt(757958891), g: BigInt(89512483), h: BigInt(738383904), x: BigInt(3607) },
-  large: { p: BigInt(757958891), g: BigInt(89512483), h: BigInt(515600104), x: BigInt(838043) },
+  small: { p: 757958891n, g: 89512483n, h: 425341755n, x: 31n },
+  mid: { p: 757958891n, g: 89512483n, h: 738383904n, x: 3607n },
+  large: { p: 757958891n, g: 89512483n, h: 515600104n, x: 838043n },
 };
 
 const inverseModCases = {
-  simple: { p: BigInt(19), num: BigInt(7), inverse: BigInt(11) },
-  hard: { p: BigInt(757958891), num: BigInt(89512483), inverse: BigInt(99593840) },
+  simple: { p: 19n, num: 7n, inverse: 11n },
+  hard: { p: 757958891n, num: 89512483n, inverse: 99593840n },
 };
 
 // prettier-ignore
 const fastExpModCases = {
-  small: { p: BigInt(757958891), n: BigInt(89512483), exp: BigInt(31), ans: BigInt(425341755) },
-  mid: { p: BigInt(757958891), n: BigInt(89512483), exp: BigInt(3607), ans: BigInt(738383904) },
-  normal: { p: BigInt(757958891), n: BigInt(89512483), exp: BigInt(838043), ans: BigInt(515600104) },
+  small: { p: 757958891n, n: 89512483n, exp: 31n, ans: 425341755n },
+  mid: { p: 757958891n, n: 89512483n, exp: 3607n, ans: 738383904n },
+  normal: { p: 757958891n, n: 89512483n, exp: 838043n, ans: 515600104n },
 };
 
 function getLimitfromAns(num: bigint): bigint {
