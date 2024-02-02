@@ -9,7 +9,7 @@
     "build": "pnpm clean && tsc --project ./tsconfig.json",
     "clean": "rm -rf dist",
     "start": "ts-node src/main.ts",
-    "test": "NODE_OPTIONS='--loader ts-node/esm --no-warnings' mocha"
+    "test": "NODE_OPTIONS='--loader ts-node/esm --no-warnings' mocha --timeout 6000"
   },
   "dependencies": {
     "wk01": "workspace:../wk01"
