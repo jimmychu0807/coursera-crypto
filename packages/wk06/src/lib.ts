@@ -9,6 +9,8 @@ const defaultOpt: Options = {
 };
 
 const NthRootCalc = {
+  // This is the referenced impl:
+  // https://gist.github.com/JochemKuijpers/cd1ad9ec23d6d90959c549de5892d6cb
   calc: function (p: bigint, n: bigint, opt: Options = defaultOpt): bigint {
     let min = 1n;
     let max = p / n;
