@@ -1,1 +1,48 @@
-console.log("hello world!");
+import NthRootCalc from "./lib.js";
+import assert from "node:assert/strict";
+
+const ONE = 1n;
+const TWO = 2n;
+
+function solvingChallengeOne(): bigint {
+  const N =
+    179769313486231590772930519078902473361797697894230657273430081157732675805505620686985379449212982959585501387537164015710139858647833778606925583497541085196591615128057575940752635007475935288710823649949940771895617054361149474865046711015101563940680527540071584560878577663743040086340742855278549092581n;
+
+  const A = NthRootCalc.calc(N, TWO, { ceil: true });
+  const x = NthRootCalc.calc(A ** TWO - N, TWO);
+  const smallerFactor = A - x;
+  const biggerFactor = A + x;
+
+  assert.strictEqual(smallerFactor * biggerFactor, N);
+  return smallerFactor;
+}
+
+function solvingChallengeTwo(): bigint | undefined {
+  const N =
+    648455842808071669662824265346772278726343720706976263060439070378797308618081116462714015276061417569195587321840254520655424906719892428844841839353281972988531310511738648965962582821502504990264452100885281673303711142296421027840289307657458645233683357077834689715838646088239640236866252211790085787877n;
+
+  const lower = NthRootCalc.calc(N, TWO) + ONE;
+  const upper = lower + BigInt(2 ** 20);
+  let sol: bigint[] = [];
+  for (let cur = lower; cur < upper; cur++) {
+    const x = NthRootCalc.calc(cur ** TWO - N, TWO);
+    const sF = cur - x;
+    const bF = cur + x;
+    if (sF * bF === N) {
+      sol = [cur, x];
+      break;
+    }
+  }
+  if (sol.length === 0) return undefined;
+
+  const sF = sol[0] - sol[1];
+  const bF = sol[0] + sol[1];
+  assert.strictEqual(sF * bF, N);
+  return sF;
+}
+
+// sol: 13407807929942597099574024998205846127479365820592393377723561443721764030073662768891111614362326998675040546094339320838419523375986027530441562135724301
+console.log(`challenge #1: ${solvingChallengeOne()}`);
+
+// sol: 25464796146996183438008816563973942229341454268524157846328581927885777969985222835143851073249573454107384461557193173304497244814071505790566593206419759
+console.log(`challenge #2: ${solvingChallengeTwo()}`);
