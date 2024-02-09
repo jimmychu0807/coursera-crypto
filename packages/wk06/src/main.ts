@@ -1,31 +1,34 @@
-import NthRootCalc from "./lib.js";
 import assert from "node:assert/strict";
+
+import { hexToU8a, u8aToUtf8 } from "wk01";
+import { DiscreteLogSolver, inverseModFunc } from "wk05";
+import { nthRootCalc, bigIntToHexStr } from "./lib.js";
 
 const ONE = 1n;
 const TWO = 2n;
 
-function solvingChallengeOne(): bigint {
+function solvingChallengeOne(): [bigint, bigint] {
   const N =
     179769313486231590772930519078902473361797697894230657273430081157732675805505620686985379449212982959585501387537164015710139858647833778606925583497541085196591615128057575940752635007475935288710823649949940771895617054361149474865046711015101563940680527540071584560878577663743040086340742855278549092581n;
 
-  const A = NthRootCalc.calc(N, TWO, { ceil: true });
-  const x = NthRootCalc.calc(A ** TWO - N, TWO);
+  const A = nthRootCalc(N, TWO, { ceil: true });
+  const x = nthRootCalc(A ** TWO - N, TWO);
   const smallerFactor = A - x;
   const biggerFactor = A + x;
 
   assert.strictEqual(smallerFactor * biggerFactor, N);
-  return smallerFactor;
+  return [biggerFactor, smallerFactor];
 }
 
 function solvingChallengeTwo(): bigint | undefined {
   const N =
     648455842808071669662824265346772278726343720706976263060439070378797308618081116462714015276061417569195587321840254520655424906719892428844841839353281972988531310511738648965962582821502504990264452100885281673303711142296421027840289307657458645233683357077834689715838646088239640236866252211790085787877n;
 
-  const lower = NthRootCalc.calc(N, TWO) + ONE;
+  const lower = nthRootCalc(N, TWO) + ONE;
   const upper = lower + BigInt(2 ** 20);
   let sol: bigint[] = [];
   for (let cur = lower; cur < upper; cur++) {
-    const x = NthRootCalc.calc(cur ** TWO - N, TWO);
+    const x = nthRootCalc(cur ** TWO - N, TWO);
     const sF = cur - x;
     const bF = cur + x;
     if (sF * bF === N) {
@@ -45,12 +48,31 @@ function solvingChallengeThree(): bigint | undefined {
   const N =
     720062263747350425279564435525583738338084451473999841826653057981916355690188337790423408664187663938485175264994017897083524079135686877441155132015188279331812309091996246361896836573643119174094961348524639707885238799396839230364676670221627018353299443241192173812729276147530748597302192751375739387929n;
 
-  const abar = NthRootCalc.calc(N * 6n * 4n, TWO, { ceil: true });
-  const x = NthRootCalc.calc(abar ** TWO - 24n * N, TWO);
+  const abar = nthRootCalc(N * 6n * 4n, TWO, { ceil: true });
+  const x = nthRootCalc(abar ** TWO - 24n * N, TWO);
   const sF = (abar - x) / 6n;
   const bF = (abar + x) / 4n;
   assert.strictEqual(sF * bF, N);
   return sF;
+}
+
+function solvingChallengeFour(): string {
+  const e = 65537n;
+  const cipherText =
+    22096451867410381776306561134883418017410069787892831071731839143676135600120538004282329650473509424343946219751512256465839967942889460764542040581564748988013734864120452325229320176487916666402997509188729971690526083222067771600019329260870009579993724077458967773697817571267229951148662959627934791540n;
+  const N =
+    179769313486231590772930519078902473361797697894230657273430081157732675805505620686985379449212982959585501387537164015710139858647833778606925583497541085196591615128057575940752635007475935288710823649949940771895617054361149474865046711015101563940680527540071584560878577663743040086340742855278549092581n;
+  const [p, q] = solvingChallengeOne();
+  const phi = N - p - q + ONE;
+  const inverseModPhi = inverseModFunc(phi);
+  const d = inverseModPhi(e);
+
+  const solver = new DiscreteLogSolver();
+  const encodedBigInt = solver.expModP(cipherText, d, N);
+  const encodedHex = bigIntToHexStr(encodedBigInt);
+
+  const bytesStr = encodedHex.split("00").pop() as string;
+  return u8aToUtf8(hexToU8a(bytesStr));
 }
 
 // sol: 13407807929942597099574024998205846127479365820592393377723561443721764030073662768891111614362326998675040546094339320838419523375986027530441562135724301
@@ -62,4 +84,7 @@ console.log(`challenge #2: ${solvingChallengeTwo()}`);
 // sol: 21909849592475533092273988531583955898982176093344929030099423584127212078126150044721102570957812665127475051465088833555993294644190955293613411658629209
 console.log(`challenge #3: ${solvingChallengeThree()}`);
 
-export { solvingChallengeOne, solvingChallengeTwo, solvingChallengeThree };
+// sol: Factoring lets us break RSA.
+console.log(`challenge #4: ${solvingChallengeFour()}`);
+
+export { solvingChallengeOne, solvingChallengeTwo, solvingChallengeThree, solvingChallengeFour };
