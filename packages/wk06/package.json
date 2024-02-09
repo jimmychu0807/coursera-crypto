@@ -12,7 +12,8 @@
     "test": "NODE_OPTIONS='--loader ts-node/esm --no-warnings' mocha"
   },
   "dependencies": {
-    "wk01": "workspace:../wk01"
+    "wk01": "workspace:../wk01",
+    "wk05": "workspace:../wk05"
   },
   "devDependencies": {
     "@tsconfig/node18": "^18.2.2",

@@ -4,7 +4,7 @@
   "description": "Coursera Crypto Week 5 Assignment",
   "type": "module",
   "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/@types/index.d.ts",
   "scripts": {
     "build": "pnpm clean && tsc --project ./tsconfig.json",
     "clean": "rm -rf dist",
