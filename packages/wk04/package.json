@@ -1,7 +1,13 @@
 {
-  "name": "wk04",
-  "version": "0.0.0",
-  "description": "Coursera Crypto Week 4 Assignment",
+  "name": "@jimmychu0807/coursera-crypto-wk04",
+  "author": "Jimmy Chu <jimmychu0807@gmail.com>",
+  "version": "1.0.0",
+  "description": "Programming assignment for Coursera Cryotography course, week 4",
+  "license": "MIT",
+  "keywords": [
+    "cryptography"
+  ],
+  "homepage": "https://github.com/jimmychu0807/coursera-crypto",
   "type": "module",
   "main": "./dist/main.js",
   "scripts": {

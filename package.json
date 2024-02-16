@@ -1,22 +1,25 @@
 {
-  "name": "ts-monorepo-template",
+  "name": "@jimmychu0807/coursera-crypto",
   "author": "Jimmy Chu <jimmychu0807@gmail.com>",
   "version": "1.0.0",
-  "description": "",
-  "keywords": [],
-  "main": "index.js",
+  "description": "Programming assignment for Coursera Cryotography course",
+  "license": "MIT",
+  "keywords": [
+    "cryptography"
+  ],
+  "homepage": "https://github.com/jimmychu0807/coursera-crypto",
+  "private": true,
   "type": "module",
   "scripts": {
     "fmt": "prettier --write .",
     "lint": "eslint .",
     "clean": "pnpm --filter \"*\" clean",
-    "build": "pnpm --filter wk01 build && pnpm --filter=!wk01 build",
+    "build": "pnpm --filter @jimmychu0807/coursera-crypto-wk01 build && pnpm --filter=!@jimmychu0807/coursera-crypto-wk01 build",
     "test": "pnpm --filter \"*\" test"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
-  "license": "MIT",
   "devDependencies": {
     "@commitlint/cli": "^17.7.2",
     "@commitlint/config-conventional": "^17.7.0",
