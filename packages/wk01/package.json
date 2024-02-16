@@ -1,6 +1,13 @@
 {
-  "name": "wk01",
-  "version": "0.0.0",
+  "name": "@jimmychu0807/coursera-crypto-wk01",
+  "author": "Jimmy Chu <jimmychu0807@gmail.com>",
+  "version": "1.0.0",
+  "description": "Programming assignment for Coursera Cryotography course, week 1",
+  "license": "MIT",
+  "keywords": [
+    "cryptography"
+  ],
+  "homepage": "https://github.com/jimmychu0807/coursera-crypto",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/@types/index.d.ts",

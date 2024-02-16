@@ -1,10 +1,16 @@
 {
-  "name": "wk06",
-  "version": "0.0.0",
-  "description": "Coursera Crypto Week 6 Assignment",
+  "name": "@jimmychu0807/coursera-crypto-wk06",
+  "author": "Jimmy Chu <jimmychu0807@gmail.com>",
+  "version": "1.0.0",
+  "description": "Programming assignment for Coursera Cryotography course, week 6",
+  "license": "MIT",
+  "keywords": [
+    "cryptography"
+  ],
+  "homepage": "https://github.com/jimmychu0807/coursera-crypto",
   "type": "module",
   "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/@types/index.d.ts",
   "scripts": {
     "build": "pnpm clean && tsc --project ./tsconfig.json",
     "clean": "rm -rf dist",
