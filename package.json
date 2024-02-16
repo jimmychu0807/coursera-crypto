@@ -20,7 +20,7 @@
     "clean": "pnpm --filter \"*\" clean",
     "build": "pnpm --filter @jimmychu0807/coursera-crypto-wk01 build && pnpm --filter=!@jimmychu0807/coursera-crypto-wk01 build",
     "test": "pnpm --filter \"*\" test",
-    "validate": "pnpm install && pnpm lint && pnpm build && pnpm test",
+    "validate": "pnpm lint && pnpm build && pnpm test",
     "ci:publish": "pnpm publish -r"
   },
   "engines": {
