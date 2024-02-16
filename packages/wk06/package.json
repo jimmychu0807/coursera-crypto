@@ -22,6 +22,10 @@
     "start": "ts-node src/main.ts",
     "test": "NODE_OPTIONS='--loader ts-node/esm --no-warnings' mocha"
   },
+  "dependencies": {
+    "wk01": "workspace:../wk01",
+    "wk05": "workspace:../wk05"
+  },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",
     "@types/chai": "^4.3.9",

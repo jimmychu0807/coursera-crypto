@@ -206,6 +206,13 @@ importers:
         version: 5.2.2
 
   packages/wk06:
+    dependencies:
+      wk01:
+        specifier: workspace:../wk01
+        version: link:../wk01
+      wk05:
+        specifier: workspace:../wk05
+        version: link:../wk05
     devDependencies:
       '@tsconfig/node20':
         specifier: ^20.1.2
