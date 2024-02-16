@@ -9,6 +9,7 @@
   ],
   "homepage": "https://github.com/jimmychu0807/coursera-crypto",
   "private": true,
+  "type": "module",
   "scripts": {
     "fmt": "prettier --write .",
     "lint": "eslint .",
