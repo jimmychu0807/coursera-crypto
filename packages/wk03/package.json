@@ -1,7 +1,7 @@
 {
   "name": "@jimmychu0807/coursera-crypto-wk03",
   "author": "Jimmy Chu <jimmychu0807@gmail.com>",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Programming assignment for Coursera Cryotography course, week 3",
   "license": "MIT",
   "keywords": [
