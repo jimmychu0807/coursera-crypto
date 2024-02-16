@@ -48,9 +48,9 @@ importers:
         specifier: ^4.3.4
         version: 4.3.4(supports-color@8.1.1)
     devDependencies:
-      '@tsconfig/node18':
-        specifier: ^18.2.2
-        version: 18.2.2
+      '@tsconfig/node20':
+        specifier: ^20.1.2
+        version: 20.1.2
       '@types/chai':
         specifier: ^4.3.9
         version: 4.3.9
@@ -88,9 +88,9 @@ importers:
         specifier: workspace:../wk01
         version: link:../wk01
     devDependencies:
-      '@tsconfig/node18':
-        specifier: ^18.2.2
-        version: 18.2.2
+      '@tsconfig/node20':
+        specifier: ^20.1.2
+        version: 20.1.2
       '@types/chai':
         specifier: ^4.3.9
         version: 4.3.9
@@ -122,9 +122,9 @@ importers:
         specifier: workspace:../wk01
         version: link:../wk01
     devDependencies:
-      '@tsconfig/node18':
-        specifier: ^18.2.2
-        version: 18.2.2
+      '@tsconfig/node20':
+        specifier: ^20.1.2
+        version: 20.1.2
       '@types/chai':
         specifier: ^4.3.9
         version: 4.3.9
@@ -159,9 +159,9 @@ importers:
         specifier: workspace:../wk01
         version: link:../wk01
     devDependencies:
-      '@tsconfig/node18':
-        specifier: ^18.2.2
-        version: 18.2.2
+      '@tsconfig/node20':
+        specifier: ^20.1.2
+        version: 20.1.2
       '@types/node':
         specifier: ^18.18.6
         version: 18.18.6
@@ -177,9 +177,9 @@ importers:
 
   packages/wk05:
     devDependencies:
-      '@tsconfig/node18':
-        specifier: ^18.2.2
-        version: 18.2.2
+      '@tsconfig/node20':
+        specifier: ^20.1.2
+        version: 20.1.2
       '@types/chai':
         specifier: ^4.3.9
         version: 4.3.9
@@ -206,17 +206,10 @@ importers:
         version: 5.2.2
 
   packages/wk06:
-    dependencies:
-      wk01:
-        specifier: workspace:../wk01
-        version: link:../wk01
-      wk05:
-        specifier: workspace:../wk05
-        version: link:../wk05
     devDependencies:
-      '@tsconfig/node18':
-        specifier: ^18.2.2
-        version: 18.2.2
+      '@tsconfig/node20':
+        specifier: ^20.1.2
+        version: 20.1.2
       '@types/chai':
         specifier: ^4.3.9
         version: 4.3.9
@@ -778,8 +771,8 @@ packages:
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
     dev: true
 
-  /@tsconfig/node18@18.2.2:
-    resolution: {integrity: sha512-d6McJeGsuoRlwWZmVIeE8CUA27lu6jLjvv1JzqmpsytOYYbVi1tHZEnwCNVOXnj4pyLvneZlFlpXUK+X9wBWyw==}
+  /@tsconfig/node20@20.1.2:
+    resolution: {integrity: sha512-madaWq2k+LYMEhmcp0fs+OGaLFk0OenpHa4gmI4VEmCKX4PJntQ6fnnGADVFrVkBj0wIdAlQnK/MrlYTHsa1gQ==}
     dev: true
 
   /@types/chai@4.3.9:

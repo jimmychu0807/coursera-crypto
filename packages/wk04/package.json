@@ -1,13 +1,18 @@
 {
   "name": "@jimmychu0807/coursera-crypto-wk04",
   "author": "Jimmy Chu <jimmychu0807@gmail.com>",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Programming assignment for Coursera Cryotography course, week 4",
   "license": "MIT",
   "keywords": [
     "cryptography"
   ],
   "homepage": "https://github.com/jimmychu0807/coursera-crypto",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jimmychu0807/coursera-crypto.git",
+    "directory": "packages/wk04"
+  },
   "type": "module",
   "main": "./dist/main.js",
   "scripts": {
@@ -21,10 +26,14 @@
     "wk01": "workspace:../wk01"
   },
   "devDependencies": {
-    "@tsconfig/node18": "^18.2.2",
+    "@tsconfig/node20": "^20.1.2",
     "@types/node": "^18.18.6",
     "ts-node": "^10.9.1",
     "tslib": "^2.6.2",
     "typescript": "^5.2.2"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   }
 }
