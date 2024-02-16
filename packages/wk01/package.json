@@ -1,13 +1,18 @@
 {
   "name": "@jimmychu0807/coursera-crypto-wk01",
   "author": "Jimmy Chu <jimmychu0807@gmail.com>",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Programming assignment for Coursera Cryotography course, week 1",
   "license": "MIT",
   "keywords": [
     "cryptography"
   ],
   "homepage": "https://github.com/jimmychu0807/coursera-crypto",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jimmychu0807/coursera-crypto.git",
+    "directory": "packages/wk01"
+  },
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/@types/index.d.ts",
@@ -17,8 +22,11 @@
     "start": "ts-node src/main.ts",
     "test": "NODE_OPTIONS='--loader ts-node/esm --no-warnings' mocha"
   },
+  "dependencies": {
+    "debug": "^4.3.4"
+  },
   "devDependencies": {
-    "@tsconfig/node18": "^18.2.2",
+    "@tsconfig/node20": "^20.1.2",
     "@types/chai": "^4.3.9",
     "@types/debug": "^4.1.9",
     "@types/mocha": "^10.0.3",
@@ -29,7 +37,8 @@
     "tslib": "^2.6.2",
     "typescript": "^5.2.2"
   },
-  "dependencies": {
-    "debug": "^4.3.4"
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   }
 }
