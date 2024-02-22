@@ -6,6 +6,8 @@ This is the solution implementation for [Coursera Crypto Course](https://www.cou
 - [Week 02](packages/wk02)
 - [Week 03](packages/wk03)
 - [Week 04](packages/wk04)
+- [Week 05](packages/wk05)
+- [Week 06](packages/wk06)
 
 ## Build & Run
 

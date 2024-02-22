@@ -18,7 +18,7 @@
   "scripts": {
     "build": "pnpm clean && tsc --project ./tsconfig.json",
     "clean": "rm -rf dist",
-    "start": "ts-node src/main.ts",
+    "start": "NODE_OPTIONS='--loader ts-node/esm --no-warnings ExperimentalWarning' node src/main.ts",
     "test": "tsc --project ./tsconfig.json"
   },
   "dependencies": {

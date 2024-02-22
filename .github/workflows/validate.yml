@@ -25,4 +25,5 @@ jobs:
           cache: "pnpm"
       - name: Validate
         run: |
+          pnpm install
           pnpm validate
